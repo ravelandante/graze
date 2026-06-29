@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getDb } from "./lib/db";
+import { extractMetadata } from "./lib/metadata";
+import { normalizeFile, trimFile } from "./lib/audio";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
+import { RecordingDetail } from "./components/RecordingDetail";
 import type { Collection, Recording } from "./types";
 
 export default function App() {
@@ -108,6 +111,53 @@ export default function App() {
     await loadAll();
   }
 
+  async function handleSaveRecording(updates: Partial<Recording>) {
+    if (!selectedRecordingId) return;
+    const db = await getDb();
+    await db.execute(
+      "UPDATE recordings SET title=?, comment=?, notes=? WHERE id=?",
+      [
+        updates.title ?? null,
+        updates.comment ?? null,
+        updates.notes ?? null,
+        selectedRecordingId,
+      ],
+    );
+    await loadAll();
+  }
+
+  async function handleNormalize() {
+    if (!selectedRecording) return;
+    const outPath = selectedRecording.filePath.replace(
+      /(\.\w+)$/,
+      "_normalized$1",
+    );
+    setStatus("Normalizing…");
+    try {
+      await normalizeFile(selectedRecording.filePath, outPath);
+      setStatus("Normalized → " + outPath.split("/").pop());
+    } catch (err) {
+      setStatus("Normalize failed: " + String(err));
+    }
+    setTimeout(() => setStatus(null), 4000);
+  }
+
+  async function handleTrim(start: number, end: number) {
+    if (!selectedRecording) return;
+    const outPath = selectedRecording.filePath.replace(
+      /(\.\w+)$/,
+      `_trim${start}-${end}$1`,
+    );
+    setStatus("Trimming…");
+    try {
+      await trimFile(selectedRecording.filePath, outPath, start, end);
+      setStatus("Trimmed → " + outPath.split("/").pop());
+    } catch (err) {
+      setStatus("Trim failed: " + String(err));
+    }
+    setTimeout(() => setStatus(null), 4000);
+  }
+
   async function handleCreateCollection(name: string) {
     const db = await getDb();
     await db.execute("INSERT INTO collections (name) VALUES (?)", [name]);
@@ -131,6 +181,27 @@ export default function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
+
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {status && (
+          <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
+            {status}
+          </div>
+        )}
+        {selectedRecording ? (
+          <RecordingDetail
+            key={selectedRecording.id}
+            recording={selectedRecording}
+            onSave={handleSaveRecording}
+            onNormalize={handleNormalize}
+            onTrim={handleTrim}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
+            Select a recording
+          </div>
+        )}
+      </main>
     </div>
   );
 }
