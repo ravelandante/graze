@@ -9,7 +9,13 @@ interface Props {
   onTrim: (start: number, end: number) => void;
 }
 
-function MetaRow({ label, value }: { label: string; value: string | number | null }) {
+function MetaRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null;
+}) {
   return (
     <div className="flex gap-2 py-1.5 border-b border-zinc-800 last:border-0">
       <span className="text-xs text-zinc-500 w-32 shrink-0">{label}</span>
@@ -18,7 +24,10 @@ function MetaRow({ label, value }: { label: string; value: string | number | nul
   );
 }
 
-function formatTimeReference(samples: number | null, sampleRate: number | null): string {
+function formatTimeReference(
+  samples: number | null,
+  sampleRate: number | null,
+): string {
   if (samples == null || sampleRate == null) return "—";
   const totalSeconds = samples / sampleRate;
   const h = Math.floor(totalSeconds / 3600);
@@ -28,11 +37,18 @@ function formatTimeReference(samples: number | null, sampleRate: number | null):
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
 }
 
-export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Props) {
+export function RecordingDetail({
+  recording,
+  onSave,
+  onNormalize,
+  onTrim,
+}: Props) {
   const [title, setTitle] = useState(recording.title ?? "");
   const [comment, setComment] = useState(recording.comment ?? "");
   const [trimStart, setTrimStart] = useState("0");
-  const [trimEnd, setTrimEnd] = useState(recording.durationSeconds?.toFixed(1) ?? "0");
+  const [trimEnd, setTrimEnd] = useState(
+    recording.durationSeconds?.toFixed(1) ?? "0",
+  );
   const [dirty, setDirty] = useState(false);
 
   function handleSave() {
@@ -57,15 +73,23 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
               <input
                 type="text"
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); setDirty(true); }}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setDirty(true);
+                }}
                 className="w-full bg-zinc-800 text-sm text-white px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">Comment</label>
+              <label className="block text-xs text-zinc-400 mb-1">
+                Comment
+              </label>
               <textarea
                 value={comment}
-                onChange={(e) => { setComment(e.target.value); setDirty(true); }}
+                onChange={(e) => {
+                  setComment(e.target.value);
+                  setDirty(true);
+                }}
                 rows={4}
                 className="w-full bg-zinc-800 text-sm text-white px-3 py-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-zinc-500"
               />
@@ -86,9 +110,18 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
             File info
           </h3>
           <MetaRow label="File" value={recording.fileName} />
-          <MetaRow label="Format" value={recording.format?.toUpperCase() ?? null} />
-          <MetaRow label="Sample rate" value={recording.sampleRate ? `${recording.sampleRate} Hz` : null} />
-          <MetaRow label="Bit depth" value={recording.bitDepth ? `${recording.bitDepth}-bit` : null} />
+          <MetaRow
+            label="Format"
+            value={recording.format?.toUpperCase() ?? null}
+          />
+          <MetaRow
+            label="Sample rate"
+            value={recording.sampleRate ? `${recording.sampleRate} Hz` : null}
+          />
+          <MetaRow
+            label="Bit depth"
+            value={recording.bitDepth ? `${recording.bitDepth}-bit` : null}
+          />
           <MetaRow label="Channels" value={recording.channels} />
         </section>
 
@@ -97,7 +130,13 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
             BWF / Recorder
           </h3>
           <MetaRow label="Device" value={recording.originator} />
-          <MetaRow label="TimeReference" value={formatTimeReference(recording.timeReference, recording.sampleRate)} />
+          <MetaRow
+            label="TimeReference"
+            value={formatTimeReference(
+              recording.timeReference,
+              recording.sampleRate,
+            )}
+          />
           <MetaRow label="Description" value={recording.bwfDescription} />
         </section>
 
@@ -106,7 +145,8 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
             Operations
           </h3>
           <p className="text-xs text-zinc-500 mb-3">
-            Operations write a new file alongside the original — the original is never modified.
+            Operations write a new file alongside the original — the original is
+            never modified.
           </p>
           <div className="space-y-3">
             <button
