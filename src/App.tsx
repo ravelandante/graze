@@ -35,6 +35,8 @@ export default function App() {
   >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const [listRatio, setListRatio] = useState(() => 288 / window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
 
   const selectedRecording =
     recordings.find((r) => r.id === selectedRecordingId) ?? null;
@@ -42,6 +44,14 @@ export default function App() {
   useEffect(() => {
     loadAll();
   }, []);
+
+  useEffect(() => {
+    function onResize() { setWindowWidth(window.innerWidth); }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const listWidth = Math.round(windowWidth * listRatio);
 
   async function loadAll() {
     const [recs, cols, mems] = await Promise.all([
@@ -182,6 +192,28 @@ export default function App() {
     await loadAll();
   }
 
+  function startResize(e: React.MouseEvent) {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = Math.round(window.innerWidth * listRatio);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    function onMouseMove(ev: MouseEvent) {
+      const w = window.innerWidth;
+      const newWidth = Math.max(150, Math.min(Math.round(w * 0.6), startWidth + ev.clientX - startX));
+      setListRatio(newWidth / w);
+    }
+    function onMouseUp() {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }
+
   async function handleToggleCollection(
     recordingId: number,
     collectionId: number,
@@ -206,16 +238,25 @@ export default function App() {
           onRename={handleRenameCollection}
           onDelete={handleDeleteCollection}
         />
-        <RecordingList
-          recordings={visibleRecordings}
-          selectedId={selectedRecordingId}
-          onSelect={setSelectedRecordingId}
-          onImport={handleImport}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          collections={collections}
-          memberships={recordingMemberships}
-          onToggleCollection={handleToggleCollection}
+        <div
+          style={{ width: listWidth }}
+          className="shrink-0 h-full flex flex-col"
+        >
+          <RecordingList
+            recordings={visibleRecordings}
+            selectedId={selectedRecordingId}
+            onSelect={setSelectedRecordingId}
+            onImport={handleImport}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            collections={collections}
+            memberships={recordingMemberships}
+            onToggleCollection={handleToggleCollection}
+          />
+        </div>
+        <div
+          onMouseDown={startResize}
+          className="w-1 shrink-0 cursor-col-resize bg-zinc-800 hover:bg-zinc-600 transition-colors select-none"
         />
         <main className="flex-1 flex flex-col overflow-hidden">
           {status && (
