@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { getDb } from "./lib/db";
+import {
+  addRecordingToCollection,
+  fetchCollections,
+  fetchMemberships,
+  fetchRecordings,
+  insertCollection,
+  insertRecording,
+  updateRecording,
+} from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
 import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
 import { CollectionSidebar } from "./components/CollectionSidebar";
@@ -11,7 +19,9 @@ import type { Collection, Recording } from "./types";
 export default function App() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [memberships, setMemberships] = useState<Map<number, Set<number>>>(new Map());
+  const [memberships, setMemberships] = useState<Map<number, Set<number>>>(
+    new Map(),
+  );
   const [selectedRecordingId, setSelectedRecordingId] = useState<number | null>(
     null,
   );
@@ -29,44 +39,21 @@ export default function App() {
   }, []);
 
   async function loadAll() {
-    const db = await getDb();
-    const recs = await db.select<Recording[]>(`
-      SELECT
-        id, title, artist, comment, originator, channels, format,
-        file_path        as filePath,
-        file_name        as fileName,
-        originator_reference  as originatorReference,
-        time_reference   as timeReference,
-        bwf_description  as bwfDescription,
-        recorded_at      as recordedAt,
-        duration_seconds as durationSeconds,
-        sample_rate      as sampleRate,
-        bit_depth        as bitDepth,
-        file_size_bytes  as fileSizeBytes,
-        imported_at      as importedAt
-      FROM recordings ORDER BY imported_at DESC
-    `);
-    const cols = await db.select<Collection[]>(
-      "SELECT * FROM collections ORDER BY name",
-    );
-    const rows = await db.select<{ collection_id: number; recording_id: number }[]>(
-      "SELECT collection_id, recording_id FROM recording_collections",
-    );
-    const map = new Map<number, Set<number>>();
-    for (const { collection_id, recording_id } of rows) {
-      if (!map.has(collection_id)) map.set(collection_id, new Set());
-      map.get(collection_id)!.add(recording_id);
-    }
+    const [recs, cols, mems] = await Promise.all([
+      fetchRecordings(),
+      fetchCollections(),
+      fetchMemberships(),
+    ]);
     setRecordings(recs);
     setCollections(cols);
-    setMemberships(map);
+    setMemberships(mems);
   }
 
   const visibleRecordings = useMemo(() => {
-    const collectionIds = selectedCollectionId !== null
-      ? (memberships.get(selectedCollectionId) ?? new Set<number>())
-      : null;
-
+    const collectionIds =
+      selectedCollectionId !== null
+        ? (memberships.get(selectedCollectionId) ?? new Set<number>())
+        : null;
     const q = searchQuery.toLowerCase();
     return recordings.filter((r) => {
       if (collectionIds && !collectionIds.has(r.id)) return false;
@@ -90,34 +77,10 @@ export default function App() {
     const pathList = Array.isArray(paths) ? paths : [paths];
     setStatus(`Importing ${pathList.length} file(s)…`);
 
-    const db = await getDb();
     for (const filePath of pathList) {
       try {
         const meta = await extractMetadata(filePath);
-        await db.execute(
-          `INSERT OR IGNORE INTO recordings
-            (file_path, file_name, title, artist, comment, originator, originator_reference,
-             time_reference, bwf_description, recorded_at, duration_seconds, sample_rate,
-             bit_depth, channels, format)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            meta.filePath,
-            meta.fileName,
-            meta.title,
-            meta.artist,
-            meta.comment,
-            meta.originator,
-            meta.originatorReference,
-            meta.timeReference,
-            meta.bwfDescription,
-            meta.recordedAt,
-            meta.durationSeconds,
-            meta.sampleRate,
-            meta.bitDepth,
-            meta.channels,
-            meta.format,
-          ],
-        );
+        await insertRecording(meta);
       } catch (err) {
         console.error("Failed to import", filePath, err);
       }
@@ -140,11 +103,10 @@ export default function App() {
       setTimeout(() => setStatus(null), 5000);
       return;
     }
-    const db = await getDb();
-    await db.execute(
-      "UPDATE recordings SET title=?, comment=? WHERE id=?",
-      [updates.title ?? null, updates.comment ?? null, selectedRecordingId],
-    );
+    await updateRecording(selectedRecordingId, {
+      title: updates.title ?? null,
+      comment: updates.comment ?? null,
+    });
     setStatus(null);
     await loadAll();
   }
@@ -182,8 +144,15 @@ export default function App() {
   }
 
   async function handleCreateCollection(name: string) {
-    const db = await getDb();
-    await db.execute("INSERT INTO collections (name) VALUES (?)", [name]);
+    await insertCollection(name);
+    await loadAll();
+  }
+
+  async function handleAddToCollection(
+    recordingId: number,
+    collectionId: number,
+  ) {
+    await addRecordingToCollection(recordingId, collectionId);
     await loadAll();
   }
 
@@ -195,7 +164,6 @@ export default function App() {
         onSelect={setSelectedCollectionId}
         onCreate={handleCreateCollection}
       />
-
       <RecordingList
         recordings={visibleRecordings}
         selectedId={selectedRecordingId}
@@ -203,8 +171,9 @@ export default function App() {
         onImport={handleImport}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        collections={collections}
+        onAddToCollection={handleAddToCollection}
       />
-
       <main className="flex-1 flex flex-col overflow-hidden">
         {status && (
           <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">

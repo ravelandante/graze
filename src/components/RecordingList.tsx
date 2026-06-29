@@ -1,4 +1,5 @@
-import type { Recording } from "../types";
+import type { Collection, Recording } from "../types";
+import { RecordingMenu } from "./RecordingMenu";
 
 interface Props {
   recordings: Recording[];
@@ -7,6 +8,8 @@ interface Props {
   onImport: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  collections: Collection[];
+  onAddToCollection: (recordingId: number, collectionId: number) => void;
 }
 
 function formatDuration(seconds: number | null): string {
@@ -23,6 +26,8 @@ export function RecordingList({
   onImport,
   searchQuery,
   onSearchChange,
+  collections,
+  onAddToCollection,
 }: Props) {
   return (
     <div className="flex flex-col h-full w-72 shrink-0 border-r border-zinc-800">
@@ -49,26 +54,28 @@ export function RecordingList({
           </li>
         )}
         {recordings.map((r) => (
-          <li key={r.id}>
+          <li key={r.id} className="relative group">
             <button
               onClick={() => onSelect(r.id)}
               className={`w-full text-left px-4 py-3 border-b border-zinc-800 ${
                 selectedId === r.id ? "bg-zinc-700" : "hover:bg-zinc-800"
               }`}
             >
-              <p
-                className={`text-sm font-medium truncate ${r.title ? "text-white" : "text-zinc-400"}`}
-              >
+              <p className={`text-sm font-medium truncate pr-6 ${r.title ? "text-white" : "text-zinc-400"}`}>
                 {r.title ?? "No title"}
               </p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">
-                {r.fileName}
-              </p>
+              <p className="text-xs text-zinc-500 mt-0.5 truncate">{r.fileName}</p>
               <p className="text-xs text-zinc-400 mt-0.5 flex gap-2">
                 <span>{r.originator ?? "Unknown device"}</span>
                 <span>{formatDuration(r.durationSeconds)}</span>
               </p>
             </button>
+
+            <RecordingMenu
+              recordingId={r.id}
+              collections={collections}
+              onAddToCollection={onAddToCollection}
+            />
           </li>
         ))}
       </ul>
