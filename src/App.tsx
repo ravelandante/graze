@@ -4,6 +4,7 @@ import {
   addRecordingToCollection,
   removeRecordingFromCollection,
   deleteCollection,
+  renameCollection,
   fetchCollections,
   fetchMemberships,
   fetchRecordings,
@@ -170,6 +171,11 @@ export default function App() {
     await loadAll();
   }
 
+  async function handleRenameCollection(id: number, name: string) {
+    await renameCollection(id, name);
+    await loadAll();
+  }
+
   async function handleDeleteCollection(id: number) {
     if (selectedCollectionId === id) setSelectedCollectionId(null);
     await deleteCollection(id);
@@ -197,6 +203,7 @@ export default function App() {
           selectedId={selectedCollectionId}
           onSelect={setSelectedCollectionId}
           onCreate={handleCreateCollection}
+          onRename={handleRenameCollection}
           onDelete={handleDeleteCollection}
         />
         <RecordingList

@@ -6,6 +6,7 @@ interface Props {
   selectedId: number | null;
   onSelect: (id: number | null) => void;
   onCreate: (name: string) => void;
+  onRename: (id: number, name: string) => void;
   onDelete: (id: number) => void;
 }
 
@@ -14,11 +15,15 @@ export function CollectionSidebar({
   selectedId,
   onSelect,
   onCreate,
+  onRename,
   onDelete,
 }: Props) {
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
 
   function startCreating() {
     setDraft("");
@@ -35,10 +40,25 @@ export function CollectionSidebar({
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter") commit();
-    if (e.key === "Escape") {
-      setCreating(false);
-      setDraft("");
-    }
+    if (e.key === "Escape") { setCreating(false); setDraft(""); }
+  }
+
+  function startRenaming(c: Collection) {
+    setRenamingId(c.id);
+    setRenameDraft(c.name);
+  }
+
+  function commitRename() {
+    const name = renameDraft.trim();
+    const id = renamingId;
+    setRenamingId(null);
+    setRenameDraft("");
+    if (id !== null && name) onRename(id, name);
+  }
+
+  function handleRenameKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") commitRename();
+    if (e.key === "Escape") { setRenamingId(null); setRenameDraft(""); }
   }
 
   return (
@@ -75,25 +95,50 @@ export function CollectionSidebar({
               selectedId === c.id ? "bg-zinc-700" : "hover:bg-zinc-800"
             }`}
           >
-            <button
-              onClick={() => onSelect(c.id)}
-              className={`flex-1 text-left px-4 py-2 text-sm truncate min-w-0 ${
-                selectedId === c.id ? "text-white" : "text-zinc-300"
-              }`}
-            >
-              {c.name}
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
-              className="shrink-0 pr-3 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity"
-              title="Delete collection"
-            >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="1,3 12,3" />
-                <path d="M3,3 L3,11 Q3,12 4,12 L9,12 Q10,12 10,11 L10,3" />
-                <path d="M5,3 L5,1.5 Q5,1 5.5,1 L7.5,1 Q8,1 8,1.5 L8,3" />
-              </svg>
-            </button>
+            {renamingId === c.id ? (
+              <input
+                autoFocus
+                value={renameDraft}
+                onChange={(e) => setRenameDraft(e.target.value)}
+                onBlur={commitRename}
+                onKeyDown={handleRenameKeyDown}
+                className="flex-1 min-w-0 px-4 py-2 text-sm bg-transparent text-white focus:outline-none"
+              />
+            ) : (
+              <>
+                <button
+                  onClick={() => onSelect(c.id)}
+                  className={`flex-1 text-left px-4 py-2 text-sm truncate min-w-0 ${
+                    selectedId === c.id ? "text-white" : "text-zinc-300"
+                  }`}
+                >
+                  {c.name}
+                </button>
+                <div className="shrink-0 flex items-center gap-1 pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startRenaming(c); }}
+                    className="text-zinc-500 hover:text-zinc-200 p-0.5"
+                    title="Rename collection"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8.5,1.5 L10.5,3.5 L4,10 L1.5,10.5 L2,8 Z" />
+                      <line x1="7" y1="3" x2="9" y2="5" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
+                    className="text-zinc-500 hover:text-red-400 p-0.5"
+                    title="Delete collection"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="1,3 11,3" />
+                      <path d="M2.5,3 L2.5,10.5 Q2.5,11 3,11 L9,11 Q9.5,11 9.5,10.5 L9.5,3" />
+                      <path d="M4.5,3 L4.5,1.5 Q4.5,1 5,1 L7,1 Q7.5,1 7.5,1.5 L7.5,3" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
 
