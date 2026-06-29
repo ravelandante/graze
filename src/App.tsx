@@ -11,6 +11,7 @@ import type { Collection, Recording } from "./types";
 export default function App() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [memberships, setMemberships] = useState<Map<number, Set<number>>>(new Map());
   const [selectedRecordingId, setSelectedRecordingId] = useState<number | null>(
     null,
   );
@@ -48,20 +49,36 @@ export default function App() {
     const cols = await db.select<Collection[]>(
       "SELECT * FROM collections ORDER BY name",
     );
+    const rows = await db.select<{ collection_id: number; recording_id: number }[]>(
+      "SELECT collection_id, recording_id FROM recording_collections",
+    );
+    const map = new Map<number, Set<number>>();
+    for (const { collection_id, recording_id } of rows) {
+      if (!map.has(collection_id)) map.set(collection_id, new Set());
+      map.get(collection_id)!.add(recording_id);
+    }
     setRecordings(recs);
     setCollections(cols);
+    setMemberships(map);
   }
 
   const visibleRecordings = useMemo(() => {
+    const collectionIds = selectedCollectionId !== null
+      ? (memberships.get(selectedCollectionId) ?? new Set<number>())
+      : null;
+
     const q = searchQuery.toLowerCase();
-    if (!q) return recordings;
-    return recordings.filter((r) =>
-      r.fileName?.toLowerCase().includes(q) ||
-      r.title?.toLowerCase().includes(q) ||
-      r.comment?.toLowerCase().includes(q) ||
-      r.originator?.toLowerCase().includes(q)
-    );
-  }, [recordings, searchQuery]);
+    return recordings.filter((r) => {
+      if (collectionIds && !collectionIds.has(r.id)) return false;
+      if (!q) return true;
+      return (
+        r.fileName?.toLowerCase().includes(q) ||
+        r.title?.toLowerCase().includes(q) ||
+        r.comment?.toLowerCase().includes(q) ||
+        r.originator?.toLowerCase().includes(q)
+      );
+    });
+  }, [recordings, memberships, selectedCollectionId, searchQuery]);
 
   async function handleImport() {
     const paths = await open({
