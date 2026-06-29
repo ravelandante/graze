@@ -70,5 +70,5 @@ export function useAudioPlayer(
     });
   }, []);
 
-  return { isPlaying, isLooping, togglePlay, playNext, toggleLoop };
+  return { isPlaying, isLooping, togglePlay, playNext, toggleLoop, audioEl: audio };
 }

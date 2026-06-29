@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Recording } from "../types";
-import { Waveform } from "./Waveform";
 
 interface Props {
   recording: Recording;
@@ -58,10 +57,6 @@ export function RecordingDetail({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="px-6 pt-5 pb-3 border-b border-zinc-800">
-        <Waveform key={recording.filePath} filePath={recording.filePath} />
-      </div>
-
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">

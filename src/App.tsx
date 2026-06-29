@@ -69,11 +69,12 @@ export default function App() {
     });
   }, [recordings, memberships, selectedCollectionId, searchQuery]);
 
-  const { isPlaying, isLooping, togglePlay, playNext, toggleLoop } = useAudioPlayer(
-    visibleRecordings,
-    selectedRecordingId,
-    setSelectedRecordingId,
-  );
+  const { isPlaying, isLooping, togglePlay, playNext, toggleLoop, audioEl } =
+    useAudioPlayer(
+      visibleRecordings,
+      selectedRecordingId,
+      setSelectedRecordingId,
+    );
 
   async function handleImport() {
     const paths = await open({
@@ -206,6 +207,7 @@ export default function App() {
       </div>
       <Playbar
         recording={selectedRecording}
+        audioEl={audioEl}
         isPlaying={isPlaying}
         isLooping={isLooping}
         onTogglePlay={togglePlay}
