@@ -56,7 +56,9 @@ export function RecordingList({
                 selectedId === r.id ? "bg-zinc-700" : "hover:bg-zinc-800"
               }`}
             >
-              <p className="text-sm font-medium text-white truncate">
+              <p
+                className={`text-sm font-medium truncate ${r.title ? "text-white" : "text-zinc-400"}`}
+              >
                 {r.title ?? "No title"}
               </p>
               <p className="text-xs text-zinc-500 mt-0.5 truncate">
