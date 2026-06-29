@@ -31,7 +31,7 @@ export default function App() {
     const db = await getDb();
     const recs = await db.select<Recording[]>(`
       SELECT
-        id, title, artist, comment, notes, originator, channels, format,
+        id, title, artist, comment, originator, channels, format,
         file_path        as filePath,
         file_name        as fileName,
         originator_reference  as originatorReference,
@@ -59,7 +59,6 @@ export default function App() {
       r.fileName?.toLowerCase().includes(q) ||
       r.title?.toLowerCase().includes(q) ||
       r.comment?.toLowerCase().includes(q) ||
-      r.notes?.toLowerCase().includes(q) ||
       r.originator?.toLowerCase().includes(q)
     );
   }, [recordings, searchQuery]);
@@ -126,8 +125,8 @@ export default function App() {
     }
     const db = await getDb();
     await db.execute(
-      "UPDATE recordings SET title=?, comment=?, notes=? WHERE id=?",
-      [updates.title ?? null, updates.comment ?? null, updates.notes ?? null, selectedRecordingId],
+      "UPDATE recordings SET title=?, comment=? WHERE id=?",
+      [updates.title ?? null, updates.comment ?? null, selectedRecordingId],
     );
     setStatus(null);
     await loadAll();

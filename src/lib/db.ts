@@ -18,7 +18,6 @@ async function migrate(db: Database) {
       title TEXT,
       artist TEXT,
       comment TEXT,
-      notes TEXT,
       originator TEXT,
       originator_reference TEXT,
       time_reference INTEGER,
@@ -53,6 +52,6 @@ async function migrate(db: Database) {
 
   await db.execute(`
     CREATE VIRTUAL TABLE IF NOT EXISTS recordings_fts
-    USING fts5(title, artist, comment, notes, originator, file_name, content=recordings, content_rowid=id)
+    USING fts5(title, artist, comment, originator, file_name, content=recordings, content_rowid=id)
   `);
 }

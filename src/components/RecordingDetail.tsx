@@ -24,38 +24,29 @@ function formatTimeReference(samples: number | null, sampleRate: number | null):
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   const s = Math.floor(totalSeconds % 60);
-  const frames = Math.floor((totalSeconds % 1) * 25); // assume 25fps
+  const frames = Math.floor((totalSeconds % 1) * 25);
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
 }
 
 export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Props) {
-  const [comment, setComment] = useState(recording.comment ?? "");
-  const [notes, setNotes] = useState(recording.notes ?? "");
   const [title, setTitle] = useState(recording.title ?? "");
+  const [comment, setComment] = useState(recording.comment ?? "");
   const [trimStart, setTrimStart] = useState("0");
-  const [trimEnd, setTrimEnd] = useState(
-    recording.durationSeconds?.toFixed(1) ?? "0"
-  );
+  const [trimEnd, setTrimEnd] = useState(recording.durationSeconds?.toFixed(1) ?? "0");
   const [dirty, setDirty] = useState(false);
 
-  function markDirty() {
-    setDirty(true);
-  }
-
   function handleSave() {
-    onSave({ title: title || null, comment: comment || null, notes: notes || null });
+    onSave({ title: title || null, comment: comment || null });
     setDirty(false);
   }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Waveform */}
       <div className="px-6 pt-5 pb-3 border-b border-zinc-800">
         <Waveform key={recording.filePath} filePath={recording.filePath} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-        {/* Editable fields */}
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
             Tags
@@ -66,7 +57,7 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
               <input
                 type="text"
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); markDirty(); }}
+                onChange={(e) => { setTitle(e.target.value); setDirty(true); }}
                 className="w-full bg-zinc-800 text-sm text-white px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
               />
             </div>
@@ -74,16 +65,7 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
               <label className="block text-xs text-zinc-400 mb-1">Comment</label>
               <textarea
                 value={comment}
-                onChange={(e) => { setComment(e.target.value); markDirty(); }}
-                rows={2}
-                className="w-full bg-zinc-800 text-sm text-white px-3 py-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-zinc-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-zinc-400 mb-1">Notes</label>
-              <textarea
-                value={notes}
-                onChange={(e) => { setNotes(e.target.value); markDirty(); }}
+                onChange={(e) => { setComment(e.target.value); setDirty(true); }}
                 rows={4}
                 className="w-full bg-zinc-800 text-sm text-white px-3 py-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-zinc-500"
               />
@@ -99,7 +81,6 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
           )}
         </section>
 
-        {/* Read-only metadata */}
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
             File info
@@ -120,7 +101,6 @@ export function RecordingDetail({ recording, onSave, onNormalize, onTrim }: Prop
           <MetaRow label="Description" value={recording.bwfDescription} />
         </section>
 
-        {/* Audio operations */}
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
             Operations

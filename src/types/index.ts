@@ -5,7 +5,6 @@ export interface Recording {
   title: string | null;
   artist: string | null;
   comment: string | null;
-  notes: string | null;
   // BWF bext chunk fields
   originator: string | null;       // device/recorder name
   originatorReference: string | null;
