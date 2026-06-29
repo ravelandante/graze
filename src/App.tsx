@@ -14,6 +14,8 @@ import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
+import { Playbar } from "./components/Playbar";
+import { useAudioPlayer } from "./hooks/useAudioPlayer";
 import type { Collection, Recording } from "./types";
 
 export default function App() {
@@ -66,6 +68,12 @@ export default function App() {
       );
     });
   }, [recordings, memberships, selectedCollectionId, searchQuery]);
+
+  const { isPlaying, isLooping, togglePlay, playNext, toggleLoop } = useAudioPlayer(
+    visibleRecordings,
+    selectedRecordingId,
+    setSelectedRecordingId,
+  );
 
   async function handleImport() {
     const paths = await open({
@@ -157,43 +165,53 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-zinc-900 text-white overflow-hidden">
-      <CollectionSidebar
-        collections={collections}
-        selectedId={selectedCollectionId}
-        onSelect={setSelectedCollectionId}
-        onCreate={handleCreateCollection}
+    <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden">
+      <div className="flex flex-1 min-h-0">
+        <CollectionSidebar
+          collections={collections}
+          selectedId={selectedCollectionId}
+          onSelect={setSelectedCollectionId}
+          onCreate={handleCreateCollection}
+        />
+        <RecordingList
+          recordings={visibleRecordings}
+          selectedId={selectedRecordingId}
+          onSelect={setSelectedRecordingId}
+          onImport={handleImport}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          collections={collections}
+          onAddToCollection={handleAddToCollection}
+        />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {status && (
+            <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
+              {status}
+            </div>
+          )}
+          {selectedRecording ? (
+            <RecordingDetail
+              key={selectedRecording.id}
+              recording={selectedRecording}
+              onSave={handleSaveRecording}
+              onNormalize={handleNormalize}
+              onTrim={handleTrim}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
+              Select a recording
+            </div>
+          )}
+        </main>
+      </div>
+      <Playbar
+        recording={selectedRecording}
+        isPlaying={isPlaying}
+        isLooping={isLooping}
+        onTogglePlay={togglePlay}
+        onNext={playNext}
+        onToggleLoop={toggleLoop}
       />
-      <RecordingList
-        recordings={visibleRecordings}
-        selectedId={selectedRecordingId}
-        onSelect={setSelectedRecordingId}
-        onImport={handleImport}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        collections={collections}
-        onAddToCollection={handleAddToCollection}
-      />
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {status && (
-          <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
-            {status}
-          </div>
-        )}
-        {selectedRecording ? (
-          <RecordingDetail
-            key={selectedRecording.id}
-            recording={selectedRecording}
-            onSave={handleSaveRecording}
-            onNormalize={handleNormalize}
-            onTrim={handleTrim}
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
-            Select a recording
-          </div>
-        )}
-      </main>
     </div>
   );
 }
