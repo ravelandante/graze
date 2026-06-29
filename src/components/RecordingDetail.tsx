@@ -16,10 +16,17 @@ function MetaRow({
   value: string | number | null;
 }) {
   return (
-    <div className="flex gap-2 py-1.5 border-b border-zinc-800 last:border-0">
-      <span className="text-xs text-zinc-500 w-32 shrink-0">{label}</span>
-      <span className="text-xs text-zinc-200 break-all">{value ?? "—"}</span>
-    </div>
+    <>
+      <span className="text-xs text-zinc-500 py-1.5 pr-1 border-b border-zinc-800 whitespace-nowrap">
+        {label}
+      </span>
+      <span
+        className="text-xs text-zinc-200 py-1.5 pl-2 border-b border-zinc-800 min-w-0"
+        style={{ wordBreak: "normal", overflowWrap: "normal" }}
+      >
+        {value ?? "—"}
+      </span>
+    </>
   );
 }
 
@@ -101,38 +108,45 @@ export function RecordingDetail({
         </section>
 
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
-            File info
-          </h3>
-          <MetaRow label="File" value={recording.fileName} />
-          <MetaRow
-            label="Format"
-            value={recording.format?.toUpperCase() ?? null}
-          />
-          <MetaRow
-            label="Sample rate"
-            value={recording.sampleRate ? `${recording.sampleRate} Hz` : null}
-          />
-          <MetaRow
-            label="Bit depth"
-            value={recording.bitDepth ? `${recording.bitDepth}-bit` : null}
-          />
-          <MetaRow label="Channels" value={recording.channels} />
-        </section>
+          <div
+            className="grid w-full"
+            style={{ gridTemplateColumns: "max-content 1fr" }}
+          >
+            <h3 className="col-span-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 pb-3">
+              File info
+            </h3>
+            <MetaRow label="File" value={recording.fileName} />
+            <MetaRow
+              label="Format"
+              value={recording.format?.toUpperCase() ?? null}
+            />
+            <MetaRow
+              label="Sample rate"
+              value={
+                recording.sampleRate ? `${recording.sampleRate} Hz` : null
+              }
+            />
+            <MetaRow
+              label="Bit depth"
+              value={
+                recording.bitDepth ? `${recording.bitDepth}-bit` : null
+              }
+            />
+            <MetaRow label="Channels" value={recording.channels} />
 
-        <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
-            BWF / Recorder
-          </h3>
-          <MetaRow label="Device" value={recording.originator} />
-          <MetaRow
-            label="TimeReference"
-            value={formatTimeReference(
-              recording.timeReference,
-              recording.sampleRate,
-            )}
-          />
-          <MetaRow label="Description" value={recording.bwfDescription} />
+            <h3 className="col-span-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 pt-6 pb-3">
+              BWF / Recorder
+            </h3>
+            <MetaRow label="Device" value={recording.originator} />
+            <MetaRow
+              label="TimeReference"
+              value={formatTimeReference(
+                recording.timeReference,
+                recording.sampleRate,
+              )}
+            />
+            <MetaRow label="Description" value={recording.bwfDescription} />
+          </div>
         </section>
 
         <section>
