@@ -10,7 +10,11 @@ interface Props {
   onSearchChange: (q: string) => void;
   collections: Collection[];
   memberships: Map<number, Set<number>>;
-  onToggleCollection: (recordingId: number, collectionId: number, isMember: boolean) => void;
+  onToggleCollection: (
+    recordingId: number,
+    collectionId: number,
+    isMember: boolean,
+  ) => void;
 }
 
 function formatDuration(seconds: number | null): string {
@@ -63,13 +67,17 @@ export function RecordingList({
                 selectedId === r.id ? "bg-zinc-700" : "hover:bg-zinc-800"
               }`}
             >
-              <p className={`text-sm font-medium truncate pr-6 ${r.title ? "text-white" : "text-zinc-400"}`}>
+              <p
+                className={`text-sm font-medium truncate pr-6 ${r.title ? "text-white" : "text-zinc-400"}`}
+              >
                 {r.title ?? "No title"}
               </p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">{r.fileName}</p>
-              <p className="text-xs text-zinc-400 mt-0.5 flex gap-2">
-                <span>{r.originator ?? "Unknown device"}</span>
-                <span>{formatDuration(r.durationSeconds)}</span>
+              <p className="text-xs text-zinc-500 mt-0.5 truncate">
+                {r.fileName}
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5 flex gap-2 min-w-0">
+                <span className="truncate">{r.originator ?? "Unknown device"}</span>
+                <span className="shrink-0">{formatDuration(r.durationSeconds)}</span>
               </p>
             </button>
 
