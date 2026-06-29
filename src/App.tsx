@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getDb } from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
@@ -52,17 +52,17 @@ export default function App() {
     setCollections(cols);
   }
 
-  const visibleRecordings = recordings.filter((r) => {
+  const visibleRecordings = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    return (
-      !q ||
-      r.fileName.toLowerCase().includes(q) ||
+    if (!q) return recordings;
+    return recordings.filter((r) =>
+      r.fileName?.toLowerCase().includes(q) ||
       r.title?.toLowerCase().includes(q) ||
       r.comment?.toLowerCase().includes(q) ||
       r.notes?.toLowerCase().includes(q) ||
       r.originator?.toLowerCase().includes(q)
     );
-  });
+  }, [recordings, searchQuery]);
 
   async function handleImport() {
     const paths = await open({
