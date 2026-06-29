@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Check, MoreHorizontal } from "lucide-react";
 import type { Collection } from "../types";
 
 interface Props {
@@ -44,11 +45,7 @@ export function RecordingMenu({ recordingId, collections, memberCollectionIds, o
           open ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-          <circle cx="2" cy="7" r="1.5" />
-          <circle cx="7" cy="7" r="1.5" />
-          <circle cx="12" cy="7" r="1.5" />
-        </svg>
+        <MoreHorizontal size={14} strokeWidth={1.5} />
       </button>
 
       {open && (
@@ -86,9 +83,7 @@ export function RecordingMenu({ recordingId, collections, memberCollectionIds, o
                   >
                     <span>{c.name}</span>
                     {isMember && (
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-400">
-                        <polyline points="1,6 4,10 11,2" />
-                      </svg>
+                      <Check size={12} strokeWidth={2} className="shrink-0 text-zinc-400" />
                     )}
                   </button>
                 );

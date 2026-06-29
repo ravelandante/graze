@@ -1,4 +1,12 @@
 import { useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Pause,
+  Play,
+  Repeat,
+  SkipForward,
+} from "lucide-react";
 import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
 
@@ -10,86 +18,6 @@ interface Props {
   onTogglePlay: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
-}
-
-function IconPlay() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <polygon points="3,1 15,8 3,15" />
-    </svg>
-  );
-}
-
-function IconPause() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <rect x="2" y="1" width="5" height="14" rx="1" />
-      <rect x="9" y="1" width="5" height="14" rx="1" />
-    </svg>
-  );
-}
-
-function IconNext() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <polygon points="1,1 11,8 1,15" />
-      <rect x="12" y="1" width="3" height="14" rx="1" />
-    </svg>
-  );
-}
-
-function IconLoop() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="1,10 1,14 5,14" />
-      <polyline points="15,6 15,2 11,2" />
-      <path d="M15,6 A6,6 0 1,0 11,2" />
-      <path d="M1,10 A6,6 0 1,1 5,14" />
-    </svg>
-  );
-}
-
-function IconChevronUp() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="2,8 6,4 10,8" />
-    </svg>
-  );
-}
-
-function IconChevronDown() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="2,4 6,8 10,4" />
-    </svg>
-  );
 }
 
 const WAVEFORM_HEIGHT = 128;
@@ -117,7 +45,11 @@ export function Playbar({
         className="absolute bottom-full right-2 bg-zinc-900 border border-b-0 border-zinc-800 text-zinc-600 hover:text-zinc-400 rounded-t px-2 py-0.5 flex items-center"
         title={expanded ? "Collapse waveform" : "Expand waveform"}
       >
-        {expanded ? <IconChevronDown /> : <IconChevronUp />}
+        {expanded ? (
+          <ChevronDown size={12} strokeWidth={1.5} />
+        ) : (
+          <ChevronUp size={12} strokeWidth={1.5} />
+        )}
       </button>
 
       {/* Waveform row */}
@@ -174,7 +106,11 @@ export function Playbar({
             disabled={!recording}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-zinc-900 hover:bg-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            {isPlaying ? <IconPause /> : <IconPlay />}
+            {isPlaying ? (
+              <Pause size={16} fill="currentColor" strokeWidth={0} />
+            ) : (
+              <Play size={16} fill="currentColor" strokeWidth={0} />
+            )}
           </button>
 
           <button
@@ -183,7 +119,7 @@ export function Playbar({
             className="text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
             title="Next"
           >
-            <IconNext />
+            <SkipForward size={16} strokeWidth={1.5} />
           </button>
         </div>
 
@@ -194,7 +130,7 @@ export function Playbar({
             className={`p-1.5 rounded ${isLooping ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
             title="Loop"
           >
-            <IconLoop />
+            <Repeat size={16} strokeWidth={1.5} />
           </button>
         </div>
       </div>

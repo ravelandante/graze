@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Pencil, Trash } from "lucide-react";
 import type { Collection } from "../types";
 
 interface Props {
@@ -40,7 +41,10 @@ export function CollectionSidebar({
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter") commit();
-    if (e.key === "Escape") { setCreating(false); setDraft(""); }
+    if (e.key === "Escape") {
+      setCreating(false);
+      setDraft("");
+    }
   }
 
   function startRenaming(c: Collection) {
@@ -58,7 +62,10 @@ export function CollectionSidebar({
 
   function handleRenameKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter") commitRename();
-    if (e.key === "Escape") { setRenamingId(null); setRenameDraft(""); }
+    if (e.key === "Escape") {
+      setRenamingId(null);
+      setRenameDraft("");
+    }
   }
 
   return (
@@ -116,25 +123,24 @@ export function CollectionSidebar({
                 </button>
                 <div className="shrink-0 flex items-center gap-1 pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={(e) => { e.stopPropagation(); startRenaming(c); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startRenaming(c);
+                    }}
                     className="text-zinc-500 hover:text-zinc-200 p-0.5"
                     title="Rename collection"
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M8.5,1.5 L10.5,3.5 L4,10 L1.5,10.5 L2,8 Z" />
-                      <line x1="7" y1="3" x2="9" y2="5" />
-                    </svg>
+                    <Pencil size={12} strokeWidth={1.5} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(c.id);
+                    }}
                     className="text-zinc-500 hover:text-red-400 p-0.5"
                     title="Delete collection"
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="1,3 11,3" />
-                      <path d="M2.5,3 L2.5,10.5 Q2.5,11 3,11 L9,11 Q9.5,11 9.5,10.5 L9.5,3" />
-                      <path d="M4.5,3 L4.5,1.5 Q4.5,1 5,1 L7,1 Q7.5,1 7.5,1.5 L7.5,3" />
-                    </svg>
+                    <Trash size={12} strokeWidth={1.5} />
                   </button>
                 </div>
               </>
