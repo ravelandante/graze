@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import type { Collection } from "../types";
 
 interface Props {
@@ -13,9 +14,29 @@ export function CollectionSidebar({
   onSelect,
   onCreate,
 }: Props) {
-  function handleNewCollection() {
-    const name = window.prompt("Collection name:");
-    if (name?.trim()) onCreate(name.trim());
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function startCreating() {
+    setDraft("");
+    setCreating(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function commit() {
+    const name = draft.trim();
+    setCreating(false);
+    setDraft("");
+    if (name) onCreate(name);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") commit();
+    if (e.key === "Escape") {
+      setCreating(false);
+      setDraft("");
+    }
   }
 
   return (
@@ -25,7 +46,7 @@ export function CollectionSidebar({
           Collections
         </span>
         <button
-          onClick={handleNewCollection}
+          onClick={startCreating}
           className="text-zinc-400 hover:text-white text-lg leading-none"
           title="New collection"
         >
@@ -44,6 +65,7 @@ export function CollectionSidebar({
         >
           All recordings
         </button>
+
         {collections.map((c) => (
           <button
             key={c.id}
@@ -57,6 +79,18 @@ export function CollectionSidebar({
             {c.name}
           </button>
         ))}
+
+        {creating && (
+          <input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={handleKeyDown}
+            placeholder="Collection name"
+            className="w-full px-4 py-2 text-sm bg-zinc-800 text-white placeholder-zinc-600 focus:outline-none"
+          />
+        )}
       </nav>
     </aside>
   );
