@@ -152,3 +152,14 @@ export async function addRecordingToCollection(
     [recordingId, collectionId],
   );
 }
+
+export async function removeRecordingFromCollection(
+  recordingId: number,
+  collectionId: number,
+): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    "DELETE FROM recording_collections WHERE recording_id = ? AND collection_id = ?",
+    [recordingId, collectionId],
+  );
+}

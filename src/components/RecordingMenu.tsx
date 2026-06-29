@@ -4,10 +4,11 @@ import type { Collection } from "../types";
 interface Props {
   recordingId: number;
   collections: Collection[];
-  onAddToCollection: (recordingId: number, collectionId: number) => void;
+  memberCollectionIds: Set<number>;
+  onToggleCollection: (recordingId: number, collectionId: number, isMember: boolean) => void;
 }
 
-export function RecordingMenu({ recordingId, collections, onAddToCollection }: Props) {
+export function RecordingMenu({ recordingId, collections, memberCollectionIds, onToggleCollection }: Props) {
   const [open, setOpen] = useState(false);
   const [showCollections, setShowCollections] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -57,7 +58,7 @@ export function RecordingMenu({ recordingId, collections, onAddToCollection }: P
               onClick={(e) => { e.stopPropagation(); setShowCollections(true); }}
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
-              Add to collection
+              Add/remove from collection
             </button>
           ) : (
             <>
@@ -70,20 +71,28 @@ export function RecordingMenu({ recordingId, collections, onAddToCollection }: P
               {collections.length === 0 && (
                 <p className="px-3 py-2 text-xs text-zinc-500">No collections yet</p>
               )}
-              {collections.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCollection(recordingId, c.id);
-                    setOpen(false);
-                    setShowCollections(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
-                >
-                  {c.name}
-                </button>
-              ))}
+              {collections.map((c) => {
+                const isMember = memberCollectionIds.has(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleCollection(recordingId, c.id, isMember);
+                      setOpen(false);
+                      setShowCollections(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-2"
+                  >
+                    <span>{c.name}</span>
+                    {isMember && (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-400">
+                        <polyline points="1,6 4,10 11,2" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
             </>
           )}
         </div>

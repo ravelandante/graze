@@ -9,7 +9,8 @@ interface Props {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   collections: Collection[];
-  onAddToCollection: (recordingId: number, collectionId: number) => void;
+  memberships: Map<number, Set<number>>;
+  onToggleCollection: (recordingId: number, collectionId: number, isMember: boolean) => void;
 }
 
 function formatDuration(seconds: number | null): string {
@@ -27,7 +28,8 @@ export function RecordingList({
   searchQuery,
   onSearchChange,
   collections,
-  onAddToCollection,
+  memberships,
+  onToggleCollection,
 }: Props) {
   return (
     <div className="flex flex-col h-full w-72 shrink-0 border-r border-zinc-800">
@@ -74,7 +76,8 @@ export function RecordingList({
             <RecordingMenu
               recordingId={r.id}
               collections={collections}
-              onAddToCollection={onAddToCollection}
+              memberCollectionIds={memberships.get(r.id) ?? new Set()}
+              onToggleCollection={onToggleCollection}
             />
           </li>
         ))}

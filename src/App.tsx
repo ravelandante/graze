@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   addRecordingToCollection,
+  removeRecordingFromCollection,
   fetchCollections,
   fetchMemberships,
   fetchRecordings,
@@ -50,6 +51,17 @@ export default function App() {
     setCollections(cols);
     setMemberships(mems);
   }
+
+  const recordingMemberships = useMemo(() => {
+    const map = new Map<number, Set<number>>();
+    for (const [collectionId, recordingIds] of memberships) {
+      for (const recordingId of recordingIds) {
+        if (!map.has(recordingId)) map.set(recordingId, new Set());
+        map.get(recordingId)!.add(collectionId);
+      }
+    }
+    return map;
+  }, [memberships]);
 
   const visibleRecordings = useMemo(() => {
     const collectionIds =
@@ -157,11 +169,16 @@ export default function App() {
     await loadAll();
   }
 
-  async function handleAddToCollection(
+  async function handleToggleCollection(
     recordingId: number,
     collectionId: number,
+    isMember: boolean,
   ) {
-    await addRecordingToCollection(recordingId, collectionId);
+    if (isMember) {
+      await removeRecordingFromCollection(recordingId, collectionId);
+    } else {
+      await addRecordingToCollection(recordingId, collectionId);
+    }
     await loadAll();
   }
 
@@ -182,7 +199,8 @@ export default function App() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           collections={collections}
-          onAddToCollection={handleAddToCollection}
+          memberships={recordingMemberships}
+          onToggleCollection={handleToggleCollection}
         />
         <main className="flex-1 flex flex-col overflow-hidden">
           {status && (
