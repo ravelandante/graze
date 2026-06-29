@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { open } from "@tauri-apps/plugin-dialog";
 import { getDb } from "./lib/db";
 import { CollectionSidebar } from "./components/CollectionSidebar";
+import { RecordingList } from "./components/RecordingList";
 import type { Collection, Recording } from "./types";
 
 export default function App() {
@@ -12,7 +14,9 @@ export default function App() {
   const [selectedCollectionId, setSelectedCollectionId] = useState<
     number | null
   >(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+
   const selectedRecording =
     recordings.find((r) => r.id === selectedRecordingId) ?? null;
 
@@ -57,6 +61,53 @@ export default function App() {
     );
   });
 
+  async function handleImport() {
+    const paths = await open({
+      multiple: true,
+      filters: [{ name: "Audio", extensions: ["wav", "mp3"] }],
+    });
+    if (!paths) return;
+
+    const pathList = Array.isArray(paths) ? paths : [paths];
+    setStatus(`Importing ${pathList.length} file(s)…`);
+
+    const db = await getDb();
+    for (const filePath of pathList) {
+      try {
+        const meta = await extractMetadata(filePath);
+        await db.execute(
+          `INSERT OR IGNORE INTO recordings
+            (file_path, file_name, title, artist, comment, originator, originator_reference,
+             time_reference, bwf_description, recorded_at, duration_seconds, sample_rate,
+             bit_depth, channels, format)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            meta.filePath,
+            meta.fileName,
+            meta.title,
+            meta.artist,
+            meta.comment,
+            meta.originator,
+            meta.originatorReference,
+            meta.timeReference,
+            meta.bwfDescription,
+            meta.recordedAt,
+            meta.durationSeconds,
+            meta.sampleRate,
+            meta.bitDepth,
+            meta.channels,
+            meta.format,
+          ],
+        );
+      } catch (err) {
+        console.error("Failed to import", filePath, err);
+      }
+    }
+
+    setStatus(null);
+    await loadAll();
+  }
+
   async function handleCreateCollection(name: string) {
     const db = await getDb();
     await db.execute("INSERT INTO collections (name) VALUES (?)", [name]);
@@ -70,6 +121,15 @@ export default function App() {
         selectedId={selectedCollectionId}
         onSelect={setSelectedCollectionId}
         onCreate={handleCreateCollection}
+      />
+
+      <RecordingList
+        recordings={visibleRecordings}
+        selectedId={selectedRecordingId}
+        onSelect={setSelectedRecordingId}
+        onImport={handleImport}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
     </div>
   );
