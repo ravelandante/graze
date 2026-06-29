@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -20,6 +20,12 @@ interface Props {
   onToggleLoop: () => void;
 }
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 const WAVEFORM_HEIGHT = 128;
 const COMPACT_HEIGHT = 32;
 const COMPACT_PAD = 3; // vertical padding (px) each side in compact mode
@@ -34,6 +40,16 @@ export function Playbar({
   onToggleLoop,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  useEffect(() => {
+    const el = audioEl;
+    function onTimeUpdate() {
+      setCurrentTime(el.currentTime);
+    }
+    el.addEventListener("timeupdate", onTimeUpdate);
+    return () => el.removeEventListener("timeupdate", onTimeUpdate);
+  }, [audioEl]);
 
   return (
     <div className="shrink-0 border-t border-zinc-800 bg-zinc-900 relative">
@@ -81,22 +97,29 @@ export function Playbar({
 
       {/* Controls row */}
       <div className="h-12 flex items-center px-4 gap-4 border-t border-zinc-800">
-        {/* Track info */}
-        <div className="flex-1 min-w-0">
-          {recording ? (
-            <>
-              <p
-                className={`text-sm font-medium truncate ${recording.title ? "text-white" : "text-zinc-500"}`}
-              >
-                {recording.title ?? "No title"}
-              </p>
-              <p className="text-xs text-zinc-500 truncate">
-                {recording.fileName}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-zinc-600">No recording selected</p>
-          )}
+        {/* Track info + timer */}
+        <div className="flex-1 min-w-0 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            {recording ? (
+              <>
+                <p
+                  className={`text-sm font-medium truncate ${recording.title ? "text-white" : "text-zinc-500"}`}
+                >
+                  {recording.title ?? "No title"}
+                </p>
+                <p className="text-xs text-zinc-500 truncate">
+                  {recording.fileName}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-zinc-600">No recording selected</p>
+            )}
+          </div>
+          <span className="text-xs tabular-nums text-zinc-500 shrink-0">
+            {recording
+              ? `${formatTime(currentTime)} / ${formatTime(recording.durationSeconds ?? 0)}`
+              : "0:00 / 0:00"}
+          </span>
         </div>
 
         {/* Play / Next */}

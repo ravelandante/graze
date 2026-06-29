@@ -76,8 +76,12 @@ export function RecordingList({
                 {r.fileName}
               </p>
               <p className="text-xs text-zinc-400 mt-0.5 flex gap-2 min-w-0">
-                <span className="truncate">{r.originator ?? "Unknown device"}</span>
-                <span className="shrink-0">{formatDuration(r.durationSeconds)}</span>
+                <span className="truncate">
+                  {r.originator ?? "Unknown device"}
+                </span>
+                <span className="shrink-0">
+                  {formatDuration(r.durationSeconds)}
+                </span>
               </p>
             </button>
 
