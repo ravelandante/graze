@@ -270,7 +270,6 @@ export default function App() {
               recording={selectedRecording}
               onSave={handleSaveRecording}
               onNormalize={handleNormalize}
-              onTrim={handleTrim}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
@@ -287,6 +286,7 @@ export default function App() {
         onTogglePlay={togglePlay}
         onNext={playNext}
         onToggleLoop={toggleLoop}
+        onTrim={handleTrim}
       />
     </div>
   );

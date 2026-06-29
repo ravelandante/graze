@@ -5,7 +5,6 @@ interface Props {
   recording: Recording;
   onSave: (updates: Partial<Recording>) => void;
   onNormalize: () => void;
-  onTrim: (start: number, end: number) => void;
 }
 
 function MetaRow({
@@ -47,14 +46,9 @@ export function RecordingDetail({
   recording,
   onSave,
   onNormalize,
-  onTrim,
 }: Props) {
   const [title, setTitle] = useState(recording.title ?? "");
   const [comment, setComment] = useState(recording.comment ?? "");
-  const [trimStart, setTrimStart] = useState("0");
-  const [trimEnd, setTrimEnd] = useState(
-    recording.durationSeconds?.toFixed(1) ?? "0",
-  );
   const [dirty, setDirty] = useState(false);
 
   function handleSave() {
@@ -157,43 +151,12 @@ export function RecordingDetail({
             Operations write a new file alongside the original — the original is
             never modified.
           </p>
-          <div className="space-y-3">
-            <button
-              onClick={onNormalize}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-sm text-white px-4 py-2 rounded text-left"
-            >
-              Normalize (EBU R128 −23 LUFS)
-            </button>
-            <div className="bg-zinc-800 rounded p-3 space-y-2">
-              <p className="text-xs text-zinc-400">Trim</p>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="number"
-                  value={trimStart}
-                  onChange={(e) => setTrimStart(e.target.value)}
-                  min="0"
-                  step="0.1"
-                  className="w-24 bg-zinc-700 text-sm text-white px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                />
-                <span className="text-zinc-500 text-xs">to</span>
-                <input
-                  type="number"
-                  value={trimEnd}
-                  onChange={(e) => setTrimEnd(e.target.value)}
-                  min="0"
-                  step="0.1"
-                  className="w-24 bg-zinc-700 text-sm text-white px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                />
-                <span className="text-zinc-500 text-xs">s</span>
-                <button
-                  onClick={() => onTrim(Number(trimStart), Number(trimEnd))}
-                  className="ml-auto bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded"
-                >
-                  Trim
-                </button>
-              </div>
-            </div>
-          </div>
+          <button
+            onClick={onNormalize}
+            className="w-full bg-zinc-800 hover:bg-zinc-700 text-sm text-white px-4 py-2 rounded text-left"
+          >
+            Normalize (EBU R128 −23 LUFS)
+          </button>
         </section>
       </div>
     </div>

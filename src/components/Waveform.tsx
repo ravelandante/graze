@@ -15,8 +15,12 @@ export function Waveform({ filePath, height = 64, audioEl, onReady }: Props) {
   const wsRef = useRef<WaveSurfer | null>(null);
   const audioElRef = useRef(audioEl);
   const onReadyRef = useRef(onReady);
-  useEffect(() => { audioElRef.current = audioEl; }, [audioEl]);
-  useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
+  useEffect(() => {
+    audioElRef.current = audioEl;
+  }, [audioEl]);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -55,7 +59,8 @@ export function Waveform({ filePath, height = 64, audioEl, onReady }: Props) {
 
     wsRef.current = ws;
     return () => {
-      if (onTimeUpdate) audioElRef.current?.removeEventListener("timeupdate", onTimeUpdate);
+      if (onTimeUpdate)
+        audioElRef.current?.removeEventListener("timeupdate", onTimeUpdate);
       ws.destroy();
     };
   }, [filePath, height]);
