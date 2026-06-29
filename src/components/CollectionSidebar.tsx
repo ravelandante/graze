@@ -6,6 +6,7 @@ interface Props {
   selectedId: number | null;
   onSelect: (id: number | null) => void;
   onCreate: (name: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export function CollectionSidebar({
@@ -13,6 +14,7 @@ export function CollectionSidebar({
   selectedId,
   onSelect,
   onCreate,
+  onDelete,
 }: Props) {
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
@@ -67,17 +69,32 @@ export function CollectionSidebar({
         </button>
 
         {collections.map((c) => (
-          <button
+          <div
             key={c.id}
-            onClick={() => onSelect(c.id)}
-            className={`w-full text-left px-4 py-2 text-sm truncate ${
-              selectedId === c.id
-                ? "bg-zinc-700 text-white"
-                : "text-zinc-300 hover:bg-zinc-800"
+            className={`group flex items-center ${
+              selectedId === c.id ? "bg-zinc-700" : "hover:bg-zinc-800"
             }`}
           >
-            {c.name}
-          </button>
+            <button
+              onClick={() => onSelect(c.id)}
+              className={`flex-1 text-left px-4 py-2 text-sm truncate min-w-0 ${
+                selectedId === c.id ? "text-white" : "text-zinc-300"
+              }`}
+            >
+              {c.name}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
+              className="shrink-0 pr-3 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity"
+              title="Delete collection"
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1,3 12,3" />
+                <path d="M3,3 L3,11 Q3,12 4,12 L9,12 Q10,12 10,11 L10,3" />
+                <path d="M5,3 L5,1.5 Q5,1 5.5,1 L7.5,1 Q8,1 8,1.5 L8,3" />
+              </svg>
+            </button>
+          </div>
         ))}
 
         {creating && (

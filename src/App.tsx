@@ -3,6 +3,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import {
   addRecordingToCollection,
   removeRecordingFromCollection,
+  deleteCollection,
   fetchCollections,
   fetchMemberships,
   fetchRecordings,
@@ -169,6 +170,12 @@ export default function App() {
     await loadAll();
   }
 
+  async function handleDeleteCollection(id: number) {
+    if (selectedCollectionId === id) setSelectedCollectionId(null);
+    await deleteCollection(id);
+    await loadAll();
+  }
+
   async function handleToggleCollection(
     recordingId: number,
     collectionId: number,
@@ -190,6 +197,7 @@ export default function App() {
           selectedId={selectedCollectionId}
           onSelect={setSelectedCollectionId}
           onCreate={handleCreateCollection}
+          onDelete={handleDeleteCollection}
         />
         <RecordingList
           recordings={visibleRecordings}

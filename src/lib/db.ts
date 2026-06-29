@@ -129,6 +129,11 @@ export async function insertCollection(name: string): Promise<void> {
   await d.execute("INSERT INTO collections (name) VALUES (?)", [name]);
 }
 
+export async function deleteCollection(id: number): Promise<void> {
+  const d = await getDb();
+  await d.execute("DELETE FROM collections WHERE id = ?", [id]);
+}
+
 export async function fetchMemberships(): Promise<Map<number, Set<number>>> {
   const d = await getDb();
   const rows = await d.select<
