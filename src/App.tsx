@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getDb } from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
-import { normalizeFile, trimFile } from "./lib/audio";
+import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
@@ -112,17 +112,24 @@ export default function App() {
   }
 
   async function handleSaveRecording(updates: Partial<Recording>) {
-    if (!selectedRecordingId) return;
+    if (!selectedRecordingId || !selectedRecording) return;
+    setStatus("Saving…");
+    try {
+      await writeFileMetadata(selectedRecording.filePath, {
+        title: updates.title,
+        comment: updates.comment,
+      });
+    } catch (err) {
+      setStatus("File write failed: " + String(err));
+      setTimeout(() => setStatus(null), 5000);
+      return;
+    }
     const db = await getDb();
     await db.execute(
       "UPDATE recordings SET title=?, comment=?, notes=? WHERE id=?",
-      [
-        updates.title ?? null,
-        updates.comment ?? null,
-        updates.notes ?? null,
-        selectedRecordingId,
-      ],
+      [updates.title ?? null, updates.comment ?? null, updates.notes ?? null, selectedRecordingId],
     );
+    setStatus(null);
     await loadAll();
   }
 
