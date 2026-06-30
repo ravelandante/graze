@@ -16,15 +16,9 @@ export function useAudioPlayer(
   const isAutoAdvanceRef = useRef(false);
   const selectedIdRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
-  useEffect(() => {
-    recordingsRef.current = recordings;
-  }, [recordings]);
-  useEffect(() => {
-    selectedIdRef.current = selectedId;
-  }, [selectedId]);
-  useEffect(() => {
-    onSelectRef.current = onSelect;
-  }, [onSelect]);
+  recordingsRef.current = recordings;
+  selectedIdRef.current = selectedId;
+  onSelectRef.current = onSelect;
 
   useEffect(() => {
     function handleEnded() {
