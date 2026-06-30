@@ -1,5 +1,4 @@
 type SettingMap = {
-  listRatio: number;
   isAutoplay: boolean;
   isAutoAdvance: boolean;
   isLooping: boolean;

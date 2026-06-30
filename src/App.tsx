@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   addRecordingToCollection,
@@ -19,7 +20,6 @@ import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
 import { Playbar } from "./components/Playbar";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
-import { loadSetting, saveSetting } from "./lib/settings";
 import type { Collection, Recording } from "./types";
 
 export default function App() {
@@ -36,22 +36,18 @@ export default function App() {
   >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const [listRatio, setListRatio] = useState(() =>
-    loadSetting("listRatio", 288 / window.innerWidth),
-  );
-  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
+
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "graze-main",
+    storage: localStorage,
+  });
 
   const selectedRecording =
     recordings.find((r) => r.id === selectedRecordingId) ?? null;
 
   useEffect(() => {
     loadAll();
-    function onResize() { setWindowWidth(window.innerWidth); }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  const listWidth = Math.round(windowWidth * listRatio);
 
   async function loadAll() {
     const [recs, cols, mems] = await Promise.all([
@@ -204,34 +200,6 @@ export default function App() {
     await loadAll();
   }
 
-  function startResize(e: React.MouseEvent) {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = Math.round(window.innerWidth * listRatio);
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    let lastRatio = listRatio;
-    function onMouseMove(ev: MouseEvent) {
-      const w = window.innerWidth;
-      const newWidth = Math.max(
-        150,
-        Math.min(Math.round(w * 0.6), startWidth + ev.clientX - startX),
-      );
-      lastRatio = newWidth / w;
-      setListRatio(lastRatio);
-    }
-    function onMouseUp() {
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      saveSetting("listRatio", lastRatio);
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-  }
-
   async function handleToggleCollection(
     recordingId: number,
     collectionId: number,
@@ -256,44 +224,47 @@ export default function App() {
           onRename={handleRenameCollection}
           onDelete={handleDeleteCollection}
         />
-        <div
-          style={{ width: listWidth }}
-          className="shrink-0 h-full flex flex-col"
+        <Group
+          orientation="horizontal"
+          defaultLayout={defaultLayout}
+          onLayoutChanged={onLayoutChanged}
+          className="flex-1 min-h-0"
         >
-          <RecordingList
-            recordings={visibleRecordings}
-            selectedId={selectedRecordingId}
-            onSelect={setSelectedRecordingId}
-            onImport={handleImport}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            collections={collections}
-            memberships={recordingMemberships}
-            onToggleCollection={handleToggleCollection}
-          />
-        </div>
-        <div
-          onMouseDown={startResize}
-          className="w-1 shrink-0 cursor-col-resize bg-zinc-800 hover:bg-zinc-600 transition-colors select-none"
-        />
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {status && (
-            <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
-              {status}
-            </div>
-          )}
-          {selectedRecording ? (
-            <RecordingDetail
-              key={selectedRecording.id}
-              recording={selectedRecording}
-              onSave={handleSaveRecording}
+          <Panel id="list" defaultSize={25} minSize={12} className="flex flex-col">
+            <RecordingList
+              recordings={visibleRecordings}
+              selectedId={selectedRecordingId}
+              onSelect={setSelectedRecordingId}
+              onImport={handleImport}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              collections={collections}
+              memberships={recordingMemberships}
+              onToggleCollection={handleToggleCollection}
             />
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
-              Select a recording
-            </div>
-          )}
-        </main>
+          </Panel>
+          <Separator className="w-1 bg-zinc-800 hover:bg-zinc-600 transition-colors cursor-col-resize" />
+          <Panel id="main" className="flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden">
+              {status && (
+                <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
+                  {status}
+                </div>
+              )}
+              {selectedRecording ? (
+                <RecordingDetail
+                  key={selectedRecording.id}
+                  recording={selectedRecording}
+                  onSave={handleSaveRecording}
+                />
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
+                  Select a recording
+                </div>
+              )}
+            </main>
+          </Panel>
+        </Group>
       </div>
       <Playbar
         recording={selectedRecording}
