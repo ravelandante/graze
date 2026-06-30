@@ -192,6 +192,20 @@ export function Playbar({
             >
               Trim
             </button>
+            <button
+              onClick={() => {
+                regionRef.current?.remove();
+                regionRef.current = null;
+                trimInRef.current = null;
+                trimOutRef.current = null;
+                setTrimIn(null);
+                setTrimOut(null);
+              }}
+              disabled={!canTrim}
+              className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Clear
+            </button>
           </>
         )}
         <button
