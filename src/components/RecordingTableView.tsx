@@ -181,7 +181,7 @@ export function RecordingTableView({
                     <div
                       onMouseDown={makeResizeHandler(header.column.id)}
                       className={`absolute right-0 top-0 h-full w-4 cursor-col-resize select-none touch-none flex items-center justify-end pr-0.5 ${
-                        isResizing ? "opacity-100" : "opacity-0 hover:opacity-100"
+                        isResizing ? "opacity-100" : "opacity-30 hover:opacity-100"
                       }`}
                     >
                       <div className={`h-3/4 w-px ${isResizing ? "bg-zinc-300" : "bg-zinc-600"}`} />
