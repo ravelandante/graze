@@ -273,11 +273,6 @@ export default function App() {
             className="flex flex-col overflow-hidden"
           >
             <main className="flex-1 flex flex-col overflow-hidden">
-              {status && (
-                <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
-                  {status}
-                </div>
-              )}
               {selectedRecording ? (
                 <RecordingDetail
                   key={selectedRecording.id}
@@ -293,6 +288,11 @@ export default function App() {
           </Panel>
         </Group>
       </div>
+      {status && (
+        <div className="fixed bottom-16 right-4 z-50 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg px-4 py-2 text-xs text-zinc-300 pointer-events-none">
+          {status}
+        </div>
+      )}
       <Playbar
         recording={selectedRecording}
         audioEl={audioEl}
