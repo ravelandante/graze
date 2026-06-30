@@ -1,5 +1,8 @@
+import { useState } from "react";
+import { LayoutList, Table2 } from "lucide-react";
 import type { Collection, Recording } from "../types";
-import { RecordingMenu } from "./RecordingMenu";
+import { RecordingListView } from "./RecordingListView";
+import { RecordingTableView } from "./RecordingTableView";
 
 interface Props {
   recordings: Recording[];
@@ -17,13 +20,6 @@ interface Props {
   ) => void;
 }
 
-function formatDuration(seconds: number | null): string {
-  if (seconds == null) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
 export function RecordingList({
   recordings,
   selectedId,
@@ -35,8 +31,11 @@ export function RecordingList({
   memberships,
   onToggleCollection,
 }: Props) {
+  const [view, setView] = useState<"list" | "table">("list");
+
   return (
     <div className="flex flex-col h-full w-full">
+      {/* Search + import */}
       <div className="px-3 py-2 border-b border-zinc-800 flex gap-2">
         <input
           type="text"
@@ -47,53 +46,48 @@ export function RecordingList({
         />
         <button
           onClick={onImport}
-          className="bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded"
+          className="bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded shrink-0"
         >
           Import
         </button>
       </div>
 
-      <ul className="flex-1 overflow-y-auto">
-        {recordings.length === 0 && (
-          <li className="text-zinc-500 text-sm text-center py-10 px-4">
-            {searchQuery ? "No results" : "Import recordings to get started"}
-          </li>
-        )}
-        {recordings.map((r) => (
-          <li key={r.id} className="relative group">
-            <button
-              onClick={() => onSelect(r.id)}
-              className={`w-full text-left px-4 py-3 border-b border-zinc-800 ${
-                selectedId === r.id ? "bg-zinc-700" : "hover:bg-zinc-800"
-              }`}
-            >
-              <p
-                className={`text-sm font-medium truncate pr-6 ${r.title ? "text-white" : "text-zinc-400"}`}
-              >
-                {r.title ?? "No title"}
-              </p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">
-                {r.fileName}
-              </p>
-              <p className="text-xs text-zinc-400 mt-0.5 flex gap-2 min-w-0">
-                <span className="truncate">
-                  {r.originator ?? "Unknown device"}
-                </span>
-                <span className="shrink-0">
-                  {formatDuration(r.durationSeconds)}
-                </span>
-              </p>
-            </button>
+      {/* View toggle */}
+      <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
+        <button
+          onClick={() => setView("list")}
+          className={`p-1 rounded ${view === "list" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
+          title="List view"
+        >
+          <LayoutList size={14} strokeWidth={1.5} />
+        </button>
+        <button
+          onClick={() => setView("table")}
+          className={`p-1 rounded ${view === "table" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
+          title="Table view"
+        >
+          <Table2 size={14} strokeWidth={1.5} />
+        </button>
+      </div>
 
-            <RecordingMenu
-              recordingId={r.id}
-              collections={collections}
-              memberCollectionIds={memberships.get(r.id) ?? new Set()}
-              onToggleCollection={onToggleCollection}
-            />
-          </li>
-        ))}
-      </ul>
+      {view === "list" ? (
+        <RecordingListView
+          recordings={recordings}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          searchQuery={searchQuery}
+          collections={collections}
+          memberships={memberships}
+          onToggleCollection={onToggleCollection}
+        />
+      ) : (
+        <RecordingTableView
+          recordings={recordings}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          searchQuery={searchQuery}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Recording } from "../types";
+import { formatTimeReference } from "../lib/format";
 
 interface Props {
   recording: Recording;
@@ -28,18 +29,6 @@ function MetaRow({
   );
 }
 
-function formatTimeReference(
-  samples: number | null,
-  sampleRate: number | null,
-): string {
-  if (samples == null || sampleRate == null) return "—";
-  const totalSeconds = samples / sampleRate;
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = Math.floor(totalSeconds % 60);
-  const frames = Math.floor((totalSeconds % 1) * 25);
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
-}
 
 export function RecordingDetail({ recording, onSave }: Props) {
   const [title, setTitle] = useState(recording.title ?? "");
