@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "graze",
-        "width": 800,
-        "height": 600
+        "width": 1280,
+        "height": 720
       }
     ],
     "security": {
