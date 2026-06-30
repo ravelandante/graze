@@ -65,6 +65,8 @@ export function useAudioPlayer(
         .play()
         .then(() => setIsPlaying(true))
         .catch(() => setIsPlaying(false));
+    } else {
+      setIsPlaying(false);
     }
   }, [selectedId]);
 
