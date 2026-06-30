@@ -1,4 +1,4 @@
-import { Pause, Play, Repeat, SkipForward } from "lucide-react";
+import { Pause, Play, Repeat, SkipForward, Square } from "lucide-react";
 import type { Recording } from "../types";
 import { formatTime } from "../lib/format";
 
@@ -8,6 +8,7 @@ interface Props {
   isPlaying: boolean;
   isLooping: boolean;
   onTogglePlay: () => void;
+  onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
 }
@@ -18,6 +19,7 @@ export function PlayControls({
   isPlaying,
   isLooping,
   onTogglePlay,
+  onStop,
   onNext,
   onToggleLoop,
 }: Props) {
@@ -48,8 +50,17 @@ export function PlayControls({
         </span>
       </div>
 
-      {/* Play / Next */}
+      {/* Stop / Play / Next */}
       <div className="flex items-center gap-3">
+        <button
+          onClick={onStop}
+          disabled={!recording}
+          className="text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Stop"
+        >
+          <Square size={16} strokeWidth={1.5} />
+        </button>
+
         <button
           onClick={onTogglePlay}
           disabled={!recording}

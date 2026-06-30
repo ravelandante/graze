@@ -12,6 +12,7 @@ interface Props {
   isPlaying: boolean;
   isLooping: boolean;
   onTogglePlay: () => void;
+  onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
   onTrim?: (start: number, end: number) => void;
@@ -27,6 +28,7 @@ export function Playbar({
   isPlaying,
   isLooping,
   onTogglePlay,
+  onStop,
   onNext,
   onToggleLoop,
   onTrim,
@@ -119,6 +121,7 @@ export function Playbar({
         isPlaying={isPlaying}
         isLooping={isLooping}
         onTogglePlay={onTogglePlay}
+        onStop={onStop}
         onNext={onNext}
         onToggleLoop={onToggleLoop}
       />

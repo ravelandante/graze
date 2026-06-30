@@ -49,7 +49,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    function onResize() { setWindowWidth(window.innerWidth); }
+    function onResize() {
+      setWindowWidth(window.innerWidth);
+    }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -96,12 +98,19 @@ export default function App() {
     });
   }, [recordings, memberships, selectedCollectionId, searchQuery]);
 
-  const { isPlaying, isLooping, togglePlay, playNext, toggleLoop, audioEl } =
-    useAudioPlayer(
-      visibleRecordings,
-      selectedRecordingId,
-      setSelectedRecordingId,
-    );
+  const {
+    isPlaying,
+    isLooping,
+    togglePlay,
+    stop,
+    playNext,
+    toggleLoop,
+    audioEl,
+  } = useAudioPlayer(
+    visibleRecordings,
+    selectedRecordingId,
+    setSelectedRecordingId,
+  );
 
   async function handleImport() {
     const paths = await open({
@@ -205,7 +214,10 @@ export default function App() {
     let lastRatio = listRatio;
     function onMouseMove(ev: MouseEvent) {
       const w = window.innerWidth;
-      const newWidth = Math.max(150, Math.min(Math.round(w * 0.6), startWidth + ev.clientX - startX));
+      const newWidth = Math.max(
+        150,
+        Math.min(Math.round(w * 0.6), startWidth + ev.clientX - startX),
+      );
       lastRatio = newWidth / w;
       setListRatio(lastRatio);
     }
@@ -290,6 +302,7 @@ export default function App() {
         isPlaying={isPlaying}
         isLooping={isLooping}
         onTogglePlay={togglePlay}
+        onStop={stop}
         onNext={playNext}
         onToggleLoop={toggleLoop}
         onTrim={handleTrim}

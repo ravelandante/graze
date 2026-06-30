@@ -64,6 +64,12 @@ export function useAudioPlayer(
     }
   }, []);
 
+  const stop = useCallback(() => {
+    audio.pause();
+    audio.currentTime = 0;
+    setIsPlaying(false);
+  }, []);
+
   const playNext = useCallback(() => {
     const recs = recordingsRef.current;
     const idx = recs.findIndex((r) => r.id === selectedIdRef.current);
@@ -82,6 +88,7 @@ export function useAudioPlayer(
     isPlaying,
     isLooping,
     togglePlay,
+    stop,
     playNext,
     toggleLoop,
     audioEl: audio,
