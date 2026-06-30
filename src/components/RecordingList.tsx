@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LayoutList, Table2 } from "lucide-react";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
+import { ImportMenu } from "./ImportMenu";
 import type { Collection, Recording } from "../types";
 import { RecordingListView } from "./RecordingListView";
 import { RecordingTableView } from "./RecordingTableView";
@@ -11,6 +12,7 @@ interface Props {
   selectedId: number | null;
   onSelect: (id: number) => void;
   onImport: () => void;
+  onImportFolder: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   collections: Collection[];
@@ -34,6 +36,7 @@ export function RecordingList({
   selectedId,
   onSelect,
   onImport,
+  onImportFolder,
   searchQuery,
   onSearchChange,
   collections,
@@ -67,12 +70,7 @@ export function RecordingList({
           placeholder="Search recordings…"
           className="flex-1 min-w-0 bg-zinc-800 text-sm text-white placeholder-zinc-500 px-3 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
         />
-        <button
-          onClick={onImport}
-          className="bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded shrink-0"
-        >
-          Import
-        </button>
+        <ImportMenu onImport={onImport} onImportFolder={onImportFolder} />
       </div>
 
       {/* View toggle */}

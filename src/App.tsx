@@ -16,6 +16,8 @@ import {
 } from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
 import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
+import { readDir } from "@tauri-apps/plugin-fs";
+import { join } from "@tauri-apps/api/path";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
@@ -112,17 +114,9 @@ export default function App() {
     setSelectedRecordingId,
   );
 
-  async function handleImport() {
-    const paths = await open({
-      multiple: true,
-      filters: [{ name: "Audio", extensions: ["wav", "mp3"] }],
-    });
-    if (!paths) return;
-
-    const pathList = Array.isArray(paths) ? paths : [paths];
-    setStatus(`Importing ${pathList.length} file(s)…`);
-
-    for (const filePath of pathList) {
+  async function importPaths(filePaths: string[]) {
+    setStatus(`Importing ${filePaths.length} file(s)…`);
+    for (const filePath of filePaths) {
       try {
         const meta = await extractMetadata(filePath);
         await insertRecording(meta);
@@ -130,9 +124,34 @@ export default function App() {
         console.error("Failed to import", filePath, err);
       }
     }
-
     setStatus(null);
     await loadAll();
+  }
+
+  async function handleImport() {
+    const paths = await open({
+      multiple: true,
+      filters: [{ name: "Audio", extensions: ["wav", "mp3"] }],
+    });
+    if (!paths) return;
+    await importPaths(Array.isArray(paths) ? paths : [paths]);
+  }
+
+  async function handleImportFolder() {
+    const folder = await open({ directory: true });
+    if (!folder || typeof folder !== "string") return;
+    const entries = await readDir(folder);
+    const filePaths = await Promise.all(
+      entries
+        .filter((e) => e.isFile && /\.(wav|mp3)$/i.test(e.name))
+        .map((e) => join(folder, e.name)),
+    );
+    if (filePaths.length === 0) {
+      setStatus("No audio files found in folder");
+      setTimeout(() => setStatus(null), 3000);
+      return;
+    }
+    await importPaths(filePaths);
   }
 
   async function handleSaveRecording(updates: Partial<Recording>) {
@@ -240,6 +259,7 @@ export default function App() {
               selectedId={selectedRecordingId}
               onSelect={setSelectedRecordingId}
               onImport={handleImport}
+              onImportFolder={handleImportFolder}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               collections={collections}
