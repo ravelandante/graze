@@ -5,6 +5,7 @@ type SettingMap = {
   isLooping: boolean;
   viewMode: "list" | "table";
   waveformHeight: number;
+  tableColumnVisibility: Record<string, boolean>;
 };
 
 export function loadSetting<K extends keyof SettingMap>(

@@ -6,6 +6,7 @@ import {
   useReactTable,
   type ColumnSizingState,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
@@ -17,6 +18,8 @@ interface Props {
   selectedId: number | null;
   onSelect: (id: number) => void;
   searchQuery: string;
+  columnVisibility: Record<string, boolean>;
+  onColumnVisibilityChange: (next: Record<string, boolean>) => void;
 }
 
 const col = createColumnHelper<Recording>();
@@ -72,6 +75,8 @@ export function RecordingTableView({
   selectedId,
   onSelect,
   searchQuery,
+  columnVisibility,
+  onColumnVisibilityChange,
 }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
@@ -80,14 +85,20 @@ export function RecordingTableView({
   const table = useReactTable({
     data: recordings,
     columns,
-    state: { sorting, columnSizing },
+    state: { sorting, columnSizing, columnVisibility: columnVisibility as VisibilityState },
     onSortingChange: setSorting,
     onColumnSizingChange: setColumnSizing,
+    onColumnVisibilityChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater(columnVisibility as VisibilityState)
+        : updater;
+      onColumnVisibilityChange(next);
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const totalSize = table.getTotalSize();
+  const totalSize = table.getVisibleFlatColumns().reduce((sum, c) => sum + c.getSize(), 0);
 
   function makeResizeHandler(columnId: string) {
     return (e: React.MouseEvent) => {

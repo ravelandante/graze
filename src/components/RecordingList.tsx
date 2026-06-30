@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LayoutList, Table2 } from "lucide-react";
+import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
 import type { Collection, Recording } from "../types";
 import { RecordingListView } from "./RecordingListView";
 import { RecordingTableView } from "./RecordingTableView";
@@ -21,6 +22,13 @@ interface Props {
   ) => void;
 }
 
+const TABLE_COLUMNS = [
+  { id: "title", label: "Title" },
+  { id: "fileName", label: "Filename" },
+  { id: "originator", label: "Device" },
+  { id: "timeRef", label: "TimeRef" },
+];
+
 export function RecordingList({
   recordings,
   selectedId,
@@ -35,10 +43,17 @@ export function RecordingList({
   const [view, setView] = useState<"list" | "table">(() =>
     loadSetting("viewMode", "list"),
   );
-
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
+    () => loadSetting("tableColumnVisibility", {}),
+  );
   function handleSetView(next: "list" | "table") {
     setView(next);
     saveSetting("viewMode", next);
+  }
+
+  function handleColumnVisibilityChange(next: Record<string, boolean>) {
+    setColumnVisibility(next);
+    saveSetting("tableColumnVisibility", next);
   }
 
   return (
@@ -76,6 +91,16 @@ export function RecordingList({
         >
           <Table2 size={14} strokeWidth={1.5} />
         </button>
+
+        {view === "table" && (
+          <div className="ml-auto">
+            <ColumnVisibilityMenu
+              columns={TABLE_COLUMNS}
+              visibility={columnVisibility}
+              onChange={handleColumnVisibilityChange}
+            />
+          </div>
+        )}
       </div>
 
       {view === "list" ? (
@@ -94,6 +119,8 @@ export function RecordingList({
           selectedId={selectedId}
           onSelect={onSelect}
           searchQuery={searchQuery}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
         />
       )}
     </div>
