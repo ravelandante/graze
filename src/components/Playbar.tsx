@@ -169,10 +169,10 @@ export function Playbar({
 
   return (
     <div className="shrink-0 border-t border-zinc-800 bg-zinc-900 relative">
-      {/* Tab above playbar */}
-      <div className="absolute bottom-full right-2 flex items-stretch bg-zinc-900 border border-b-0 border-zinc-800 rounded-t text-xs overflow-hidden">
+      {/* Tabs above playbar */}
+      <div className="absolute bottom-full right-2 flex items-end gap-1">
         {expanded && (
-          <>
+          <div className="flex items-stretch bg-zinc-900 border border-b-0 border-zinc-800 rounded-t text-xs overflow-hidden">
             <button
               onClick={handleSetIn}
               className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800"
@@ -202,18 +202,18 @@ export function Playbar({
                 setTrimOut(null);
               }}
               disabled={!canTrim}
-              className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-2 py-0.5 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Clear
             </button>
-          </>
+          </div>
         )}
         <button
           onClick={(e) => {
             e.stopPropagation();
             setExpanded((v) => !v);
           }}
-          className="px-2 py-0.5 text-zinc-600 hover:text-zinc-400 flex items-center"
+          className="bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 text-zinc-600 hover:text-zinc-400 flex items-center"
           title={expanded ? "Collapse waveform" : "Expand waveform"}
         >
           {expanded ? (
