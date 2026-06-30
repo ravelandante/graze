@@ -70,7 +70,6 @@ export function Playbar({
     }
   }, [expanded]);
 
-  // Reset trim state when the recording changes
   useEffect(() => {
     trimInRef.current = null;
     trimOutRef.current = null;

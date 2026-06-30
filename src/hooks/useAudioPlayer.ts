@@ -14,9 +14,15 @@ export function useAudioPlayer(
   const recordingsRef = useRef(recordings);
   const selectedIdRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
-  useEffect(() => { recordingsRef.current = recordings; }, [recordings]);
-  useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
-  useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+  useEffect(() => {
+    recordingsRef.current = recordings;
+  }, [recordings]);
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     function handleEnded() {
@@ -34,7 +40,6 @@ export function useAudioPlayer(
     };
   }, []);
 
-  // Load and play whenever the selected recording changes
   useEffect(() => {
     if (!selectedId) {
       audio.pause();
@@ -44,7 +49,10 @@ export function useAudioPlayer(
     const recording = recordingsRef.current.find((r) => r.id === selectedId);
     if (!recording) return;
     audio.src = convertFileSrc(recording.filePath);
-    audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    audio
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch(() => setIsPlaying(false));
   }, [selectedId]);
 
   const togglePlay = useCallback(() => {
@@ -70,5 +78,12 @@ export function useAudioPlayer(
     });
   }, []);
 
-  return { isPlaying, isLooping, togglePlay, playNext, toggleLoop, audioEl: audio };
+  return {
+    isPlaying,
+    isLooping,
+    togglePlay,
+    playNext,
+    toggleLoop,
+    audioEl: audio,
+  };
 }
