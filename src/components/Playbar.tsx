@@ -14,11 +14,13 @@ interface Props {
   isPlaying: boolean;
   isLooping: boolean;
   isAutoAdvance: boolean;
+  isAutoplay: boolean;
   onTogglePlay: () => void;
   onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
   onToggleAutoAdvance: () => void;
+  onToggleAutoplay: () => void;
   onNormalize?: () => void;
   onTrim?: (start: number, end: number) => void;
 }
@@ -34,11 +36,13 @@ export function Playbar({
   isPlaying,
   isLooping,
   isAutoAdvance,
+  isAutoplay,
   onTogglePlay,
   onStop,
   onNext,
   onToggleLoop,
   onToggleAutoAdvance,
+  onToggleAutoplay,
   onNormalize,
   onTrim,
 }: Props) {
@@ -123,11 +127,13 @@ export function Playbar({
         isPlaying={isPlaying}
         isLooping={isLooping}
         isAutoAdvance={isAutoAdvance}
+        isAutoplay={isAutoplay}
         onTogglePlay={onTogglePlay}
         onStop={onStop}
         onNext={onNext}
         onToggleLoop={onToggleLoop}
         onToggleAutoAdvance={onToggleAutoAdvance}
+        onToggleAutoplay={onToggleAutoplay}
       />
     </div>
   );

@@ -11,10 +11,12 @@ export function useAudioPlayer(
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [isAutoAdvance, setIsAutoAdvance] = useState(false);
+  const [isAutoplay, setIsAutoplay] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);
   const isAutoAdvanceRef = useRef(false);
+  const isAutoplayRef = useRef(true);
   const selectedIdRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
   recordingsRef.current = recordings;
@@ -55,10 +57,12 @@ export function useAudioPlayer(
     const recording = recordingsRef.current.find((r) => r.id === selectedId);
     if (!recording) return;
     audio.src = convertFileSrc(recording.filePath);
-    audio
-      .play()
-      .then(() => setIsPlaying(true))
-      .catch(() => setIsPlaying(false));
+    if (isAutoplayRef.current) {
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
+    }
   }, [selectedId]);
 
   const togglePlay = useCallback(() => {
@@ -97,16 +101,25 @@ export function useAudioPlayer(
     });
   }, []);
 
+  const toggleAutoplay = useCallback(() => {
+    setIsAutoplay((prev) => {
+      isAutoplayRef.current = !prev;
+      return !prev;
+    });
+  }, []);
+
   return {
     isPlaying,
     isLooping,
     isAutoAdvance,
+    isAutoplay,
     currentTime,
     togglePlay,
     stop,
     playNext,
     toggleLoop,
     toggleAutoAdvance,
+    toggleAutoplay,
     audioEl: audio,
   };
 }

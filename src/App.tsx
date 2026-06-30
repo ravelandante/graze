@@ -103,6 +103,8 @@ export default function App() {
     playNext,
     toggleLoop,
     toggleAutoAdvance,
+    toggleAutoplay,
+    isAutoplay,
     audioEl,
   } = useAudioPlayer(
     visibleRecordings,
@@ -300,11 +302,13 @@ export default function App() {
         isPlaying={isPlaying}
         isLooping={isLooping}
         isAutoAdvance={isAutoAdvance}
+        isAutoplay={isAutoplay}
         onTogglePlay={togglePlay}
         onStop={stop}
         onNext={playNext}
         onToggleLoop={toggleLoop}
         onToggleAutoAdvance={toggleAutoAdvance}
+        onToggleAutoplay={toggleAutoplay}
         onNormalize={selectedRecording ? handleNormalize : undefined}
         onTrim={handleTrim}
       />

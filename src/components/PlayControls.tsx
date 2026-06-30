@@ -1,4 +1,5 @@
 import {
+  CirclePlay,
   ChevronsRight,
   Pause,
   Play,
@@ -15,11 +16,13 @@ interface Props {
   isPlaying: boolean;
   isLooping: boolean;
   isAutoAdvance: boolean;
+  isAutoplay: boolean;
   onTogglePlay: () => void;
   onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
   onToggleAutoAdvance: () => void;
+  onToggleAutoplay: () => void;
 }
 
 export function PlayControls({
@@ -28,11 +31,13 @@ export function PlayControls({
   isPlaying,
   isLooping,
   isAutoAdvance,
+  isAutoplay,
   onTogglePlay,
   onStop,
   onNext,
   onToggleLoop,
   onToggleAutoAdvance,
+  onToggleAutoplay,
 }: Props) {
   return (
     <div className="h-12 flex items-center px-4 gap-4 border-t border-zinc-800">
@@ -94,8 +99,15 @@ export function PlayControls({
         </button>
       </div>
 
-      {/* Auto-advance + Loop */}
+      {/* Autoplay + Auto-advance + Loop */}
       <div className="flex-1 flex justify-end gap-1">
+        <button
+          onClick={onToggleAutoplay}
+          className={`p-1.5 rounded ${isAutoplay ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
+          title="Autoplay"
+        >
+          <CirclePlay size={16} strokeWidth={1.5} />
+        </button>
         <button
           onClick={onToggleAutoAdvance}
           className={`p-1.5 rounded ${isAutoAdvance ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
