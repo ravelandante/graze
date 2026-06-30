@@ -4,7 +4,6 @@ import type { Recording } from "../types";
 interface Props {
   recording: Recording;
   onSave: (updates: Partial<Recording>) => void;
-  onNormalize: () => void;
 }
 
 function MetaRow({
@@ -42,11 +41,7 @@ function formatTimeReference(
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
 }
 
-export function RecordingDetail({
-  recording,
-  onSave,
-  onNormalize,
-}: Props) {
+export function RecordingDetail({ recording, onSave }: Props) {
   const [title, setTitle] = useState(recording.title ?? "");
   const [comment, setComment] = useState(recording.comment ?? "");
   const [dirty, setDirty] = useState(false);
@@ -143,21 +138,6 @@ export function RecordingDetail({
           </div>
         </section>
 
-        <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
-            Operations
-          </h3>
-          <p className="text-xs text-zinc-500 mb-3">
-            Operations write a new file alongside the original — the original is
-            never modified.
-          </p>
-          <button
-            onClick={onNormalize}
-            className="w-full bg-zinc-800 hover:bg-zinc-700 text-sm text-white px-4 py-2 rounded text-left"
-          >
-            Normalize (EBU R128 −23 LUFS)
-          </button>
-        </section>
       </div>
     </div>
   );

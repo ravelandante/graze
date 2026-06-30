@@ -4,6 +4,7 @@ import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
 import { PlayControls } from "./PlayControls";
 import { TrimTab } from "./TrimTab";
+import { NormalizeTab } from "./NormalizeTab";
 import { useTrim } from "../hooks/useTrim";
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
   onNext: () => void;
   onToggleLoop: () => void;
   onToggleAutoAdvance: () => void;
+  onNormalize?: () => void;
   onTrim?: (start: number, end: number) => void;
 }
 
@@ -37,6 +39,7 @@ export function Playbar({
   onNext,
   onToggleLoop,
   onToggleAutoAdvance,
+  onNormalize,
   onTrim,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -56,6 +59,9 @@ export function Playbar({
     <div className="shrink-0 border-t border-zinc-800 bg-zinc-900 relative">
       {/* Tabs above playbar */}
       <div className="absolute bottom-full right-2 flex items-end gap-1">
+        {expanded && onNormalize && (
+          <NormalizeTab onNormalize={onNormalize} />
+        )}
         {expanded && (
           <TrimTab
             trimIn={trimIn}
