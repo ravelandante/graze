@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { loadSetting, saveSetting } from "../lib/settings";
 import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
 import { PlayControls } from "./PlayControls";
@@ -25,9 +26,7 @@ interface Props {
   onTrim?: (start: number, end: number) => void;
 }
 
-const WAVEFORM_HEIGHT = 128;
 const COMPACT_HEIGHT = 32;
-const COMPACT_PAD = 3;
 
 export function Playbar({
   recording,
@@ -47,6 +46,39 @@ export function Playbar({
   onTrim,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [waveformHeight, setWaveformHeight] = useState(() =>
+    loadSetting("waveformHeight", 128),
+  );
+  const [maxWaveformHeight] = useState(() => Math.floor(window.innerHeight / 3));
+  const [isHeightDragging, setIsHeightDragging] = useState(false);
+
+  function startHeightResize(e: React.MouseEvent) {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startHeight = waveformHeight;
+    let lastHeight = startHeight;
+
+    setIsHeightDragging(true);
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+
+    function onMouseMove(ev: MouseEvent) {
+      lastHeight = Math.max(64, Math.min(maxWaveformHeight, startHeight + startY - ev.clientY));
+      setWaveformHeight(lastHeight);
+    }
+
+    function onMouseUp() {
+      setIsHeightDragging(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      saveSetting("waveformHeight", lastHeight);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }
 
   const {
     trimIn,
@@ -59,13 +91,24 @@ export function Playbar({
     handleClear,
   } = useTrim(audioEl, recording, expanded, onTrim);
 
+  const displayHeight = expanded ? waveformHeight : COMPACT_HEIGHT;
+  const scale = displayHeight / maxWaveformHeight;
+  const easing = isHeightDragging ? undefined : "0.15s ease";
+
   return (
-    <div className="shrink-0 border-t border-zinc-800 bg-zinc-900 relative">
+    <div className="shrink-0 bg-zinc-900 relative">
+      {expanded ? (
+        <div
+          onMouseDown={startHeightResize}
+          className="h-1 bg-zinc-800 hover:bg-zinc-600 cursor-row-resize transition-colors"
+        />
+      ) : (
+        <div className="h-px bg-zinc-800" />
+      )}
+
       {/* Tabs above playbar */}
       <div className="absolute bottom-full right-2 flex items-end gap-1">
-        {expanded && onNormalize && (
-          <NormalizeTab onNormalize={onNormalize} />
-        )}
+        {expanded && onNormalize && <NormalizeTab onNormalize={onNormalize} />}
         {expanded && (
           <TrimTab
             trimIn={trimIn}
@@ -97,28 +140,35 @@ export function Playbar({
       <div
         className="overflow-hidden"
         style={{
-          height: expanded ? WAVEFORM_HEIGHT : COMPACT_HEIGHT + COMPACT_PAD * 2,
-          paddingTop: COMPACT_PAD,
-          paddingBottom: COMPACT_PAD,
-          transition: "height 0.15s ease",
+          height: displayHeight,
+          transition: easing ? `height ${easing}` : undefined,
         }}
       >
-        {recording ? (
-          <Waveform
-            key={recording.filePath}
-            filePath={recording.filePath}
-            height={expanded ? WAVEFORM_HEIGHT : COMPACT_HEIGHT}
-            audioEl={audioEl}
-            onReady={handleWsReady}
-          />
-        ) : (
-          <div
-            style={{ height: expanded ? WAVEFORM_HEIGHT : COMPACT_HEIGHT }}
-            className="flex items-center px-4"
-          >
-            <div className="w-full h-px bg-zinc-800" />
-          </div>
-        )}
+        <div
+          style={{
+            height: maxWaveformHeight,
+            transform: `scaleY(${scale})`,
+            transformOrigin: "top",
+            transition: easing ? `transform ${easing}` : undefined,
+          }}
+        >
+          {recording ? (
+            <Waveform
+              key={recording.filePath}
+              filePath={recording.filePath}
+              height={maxWaveformHeight}
+              audioEl={audioEl}
+              onReady={handleWsReady}
+            />
+          ) : (
+            <div
+              style={{ height: maxWaveformHeight }}
+              className="flex items-center px-4"
+            >
+              <div className="w-full h-px bg-zinc-800" />
+            </div>
+          )}
+        </div>
       </div>
 
       <PlayControls

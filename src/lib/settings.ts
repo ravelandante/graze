@@ -4,6 +4,7 @@ type SettingMap = {
   isAutoAdvance: boolean;
   isLooping: boolean;
   viewMode: "list" | "table";
+  waveformHeight: number;
 };
 
 export function loadSetting<K extends keyof SettingMap>(
