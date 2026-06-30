@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
+import { Group, Panel, Separator, useDefaultLayout, usePanelRef } from "react-resizable-panels";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   addRecordingToCollection,
@@ -41,6 +42,9 @@ export default function App() {
     id: "graze-main",
     storage: localStorage,
   });
+
+  const detailPanelRef = usePanelRef();
+  const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
   const selectedRecording =
     recordings.find((r) => r.id === selectedRecordingId) ?? null;
@@ -243,8 +247,31 @@ export default function App() {
               onToggleCollection={handleToggleCollection}
             />
           </Panel>
-          <Separator className="w-1 bg-zinc-800 hover:bg-zinc-600 transition-colors cursor-col-resize" />
-          <Panel id="main" className="flex flex-col overflow-hidden">
+          <Separator className="relative w-1 bg-zinc-800 hover:bg-zinc-600 transition-colors cursor-col-resize overflow-visible">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                isDetailCollapsed
+                  ? detailPanelRef.current?.expand()
+                  : detailPanelRef.current?.collapse();
+              }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-4 h-6 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700 cursor-pointer"
+              title={isDetailCollapsed ? "Open detail panel" : "Close detail panel"}
+            >
+              {isDetailCollapsed
+                ? <ChevronLeft size={10} strokeWidth={2.5} />
+                : <ChevronRight size={10} strokeWidth={2.5} />}
+            </button>
+          </Separator>
+          <Panel
+            id="main"
+            collapsible
+            collapsedSize={0}
+            minSize={20}
+            panelRef={detailPanelRef}
+            onResize={(size) => setIsDetailCollapsed(size.inPixels < 1)}
+            className="flex flex-col overflow-hidden"
+          >
             <main className="flex-1 flex flex-col overflow-hidden">
               {status && (
                 <div className="px-4 py-2 bg-zinc-800 text-xs text-zinc-300 border-b border-zinc-700">
