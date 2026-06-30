@@ -35,7 +35,10 @@ export default function App() {
   >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const [listRatio, setListRatio] = useState(() => 288 / window.innerWidth);
+  const [listRatio, setListRatio] = useState(() => {
+    const saved = parseFloat(localStorage.getItem("listRatio") ?? "");
+    return Number.isFinite(saved) ? saved : 288 / window.innerWidth;
+  });
   const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
 
   const selectedRecording =
@@ -199,14 +202,17 @@ export default function App() {
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
 
+    let lastRatio = listRatio;
     function onMouseMove(ev: MouseEvent) {
       const w = window.innerWidth;
       const newWidth = Math.max(150, Math.min(Math.round(w * 0.6), startWidth + ev.clientX - startX));
-      setListRatio(newWidth / w);
+      lastRatio = newWidth / w;
+      setListRatio(lastRatio);
     }
     function onMouseUp() {
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
+      localStorage.setItem("listRatio", String(lastRatio));
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     }
