@@ -5,6 +5,7 @@ type SettingMap = {
   viewMode: "list" | "table";
   waveformHeight: number;
   tableColumnVisibility: Record<string, boolean>;
+  playbarMode: "waveform" | "spectrogram";
 };
 
 export function loadSetting<K extends keyof SettingMap>(

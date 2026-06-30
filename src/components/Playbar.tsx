@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { AudioWaveform, ChevronDown, ChevronUp, Layers } from "lucide-react";
 import { loadSetting, saveSetting } from "../lib/settings";
 import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
+import { Spectrogram } from "./Spectrogram";
 import { PlayControls } from "./PlayControls";
 import { TrimTab } from "./TrimTab";
 import { NormalizeTab } from "./NormalizeTab";
@@ -46,6 +47,9 @@ export function Playbar({
   onTrim,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [playbarMode, setPlaybarMode] = useState<"waveform" | "spectrogram">(
+    () => loadSetting("playbarMode", "waveform"),
+  );
   const [waveformHeight, setWaveformHeight] = useState(() =>
     loadSetting("waveformHeight", 128),
   );
@@ -128,6 +132,22 @@ export function Playbar({
         <button
           onClick={(e) => {
             e.stopPropagation();
+            const next = playbarMode === "waveform" ? "spectrogram" : "waveform";
+            setPlaybarMode(next);
+            saveSetting("playbarMode", next);
+          }}
+          className={`bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center ${playbarMode === "spectrogram" ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
+          title={playbarMode === "waveform" ? "Switch to spectrogram" : "Switch to waveform"}
+        >
+          {playbarMode === "waveform" ? (
+            <Layers size={12} strokeWidth={1.5} />
+          ) : (
+            <AudioWaveform size={12} strokeWidth={1.5} />
+          )}
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
             setExpanded((v) => !v);
           }}
           className="bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 text-zinc-600 hover:text-zinc-400 flex items-center"
@@ -157,13 +177,20 @@ export function Playbar({
             transition: easing ? `transform ${easing}` : undefined,
           }}
         >
-          {recording ? (
+          {recording && playbarMode === "waveform" ? (
             <Waveform
               key={recording.filePath}
               filePath={recording.filePath}
               height={maxWaveformHeight}
               audioEl={audioEl}
               onReady={handleWsReady}
+            />
+          ) : recording && playbarMode === "spectrogram" ? (
+            <Spectrogram
+              key={recording.filePath}
+              filePath={recording.filePath}
+              height={maxWaveformHeight}
+              audioEl={audioEl}
             />
           ) : (
             <div
