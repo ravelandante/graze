@@ -3,8 +3,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
 import { PlayControls } from "./PlayControls";
+import { TrimTab } from "./TrimTab";
 import { useTrim } from "../hooks/useTrim";
-import { formatTime } from "../lib/format";
 
 interface Props {
   recording: Recording | null;
@@ -59,34 +59,15 @@ export function Playbar({
       {/* Tabs above playbar */}
       <div className="absolute bottom-full right-2 flex items-end gap-1">
         {expanded && (
-          <div className="flex items-stretch bg-zinc-900 border border-b-0 border-zinc-800 rounded-t text-xs overflow-hidden">
-            <button
-              onClick={handleSetIn}
-              className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800"
-            >
-              {trimIn !== null ? `In ${formatTime(trimIn)}` : "Set In"}
-            </button>
-            <button
-              onClick={handleSetOut}
-              className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800"
-            >
-              {trimOut !== null ? `Out ${formatTime(trimOut)}` : "Set Out"}
-            </button>
-            <button
-              onClick={handleTrimApply}
-              disabled={!canTrim}
-              className="px-2 py-0.5 text-zinc-400 hover:text-white border-r border-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Trim
-            </button>
-            <button
-              onClick={handleClear}
-              disabled={!canTrim}
-              className="px-2 py-0.5 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Clear
-            </button>
-          </div>
+          <TrimTab
+            trimIn={trimIn}
+            trimOut={trimOut}
+            canTrim={canTrim}
+            onSetIn={handleSetIn}
+            onSetOut={handleSetOut}
+            onTrim={handleTrimApply}
+            onClear={handleClear}
+          />
         )}
         <button
           onClick={(e) => {
