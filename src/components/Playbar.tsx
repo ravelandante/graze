@@ -63,6 +63,13 @@ export function Playbar({
     return () => el.removeEventListener("timeupdate", onTimeUpdate);
   }, [audioEl]);
 
+  useEffect(() => {
+    if (!expanded) {
+      regionRef.current?.remove();
+      regionRef.current = null;
+    }
+  }, [expanded]);
+
   // Reset trim state when the recording changes
   useEffect(() => {
     trimInRef.current = null;
@@ -114,6 +121,7 @@ export function Playbar({
     regionRef.current = null;
     const regions = ws.registerPlugin(RegionsPlugin.create());
     regionsRef.current = regions;
+    if (!expanded) return;
     const inPt = trimInRef.current;
     const outPt = trimOutRef.current;
     if (inPt !== null && outPt !== null) {
