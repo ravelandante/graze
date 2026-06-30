@@ -42,9 +42,7 @@ const columns = [
     header: "Filename",
     size: 200,
     minSize: 80,
-    cell: (info) => (
-      <p className="truncate text-zinc-400">{info.getValue()}</p>
-    ),
+    cell: (info) => <p className="truncate text-zinc-400">{info.getValue()}</p>,
   }),
   col.accessor("originator", {
     header: "Device",
@@ -85,20 +83,27 @@ export function RecordingTableView({
   const table = useReactTable({
     data: recordings,
     columns,
-    state: { sorting, columnSizing, columnVisibility: columnVisibility as VisibilityState },
+    state: {
+      sorting,
+      columnSizing,
+      columnVisibility: columnVisibility as VisibilityState,
+    },
     onSortingChange: setSorting,
     onColumnSizingChange: setColumnSizing,
     onColumnVisibilityChange: (updater) => {
-      const next = typeof updater === "function"
-        ? updater(columnVisibility as VisibilityState)
-        : updater;
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility as VisibilityState)
+          : updater;
       onColumnVisibilityChange(next);
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const totalSize = table.getVisibleFlatColumns().reduce((sum, c) => sum + c.getSize(), 0);
+  const totalSize = table
+    .getVisibleFlatColumns()
+    .reduce((sum, c) => sum + c.getSize(), 0);
 
   function makeResizeHandler(columnId: string) {
     return (e: React.MouseEvent) => {
@@ -170,32 +175,48 @@ export function RecordingTableView({
                   <th
                     key={header.id}
                     className="relative text-left text-zinc-500 font-medium px-3 py-2 whitespace-nowrap overflow-hidden"
-                    style={{ width: `${(header.getSize() / totalSize) * 100}%` }}
+                    style={{
+                      width: `${(header.getSize() / totalSize) * 100}%`,
+                    }}
                   >
                     {canSort ? (
                       <button
                         onClick={header.column.getToggleSortingHandler()}
                         className="flex items-center gap-1 hover:text-zinc-300"
                       >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                         {sorted === "asc" ? (
                           <ChevronUp size={11} strokeWidth={2} />
                         ) : sorted === "desc" ? (
                           <ChevronDown size={11} strokeWidth={2} />
                         ) : (
-                          <ChevronsUpDown size={11} strokeWidth={1.5} className="opacity-40" />
+                          <ChevronsUpDown
+                            size={11}
+                            strokeWidth={1.5}
+                            className="opacity-40"
+                          />
                         )}
                       </button>
                     ) : (
-                      flexRender(header.column.columnDef.header, header.getContext())
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
                     )}
                     <div
                       onMouseDown={makeResizeHandler(header.column.id)}
                       className={`absolute right-0 top-0 h-full w-4 cursor-col-resize select-none touch-none flex items-center justify-end pr-0.5 ${
-                        isResizing ? "opacity-100" : "opacity-30 hover:opacity-100"
+                        isResizing
+                          ? "opacity-100"
+                          : "opacity-30 hover:opacity-100"
                       }`}
                     >
-                      <div className={`h-3/4 w-px ${isResizing ? "bg-zinc-300" : "bg-zinc-600"}`} />
+                      <div
+                        className={`h-3/4 w-px ${isResizing ? "bg-zinc-300" : "bg-zinc-600"}`}
+                      />
                     </div>
                   </th>
                 );
@@ -209,14 +230,18 @@ export function RecordingTableView({
               key={row.id}
               onClick={() => onSelect(row.original.id)}
               className={`border-b border-zinc-800 cursor-pointer ${
-                selectedId === row.original.id ? "bg-zinc-700" : "hover:bg-zinc-800"
+                selectedId === row.original.id
+                  ? "bg-zinc-700"
+                  : "hover:bg-zinc-800"
               }`}
             >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
                   className="px-3 py-2 whitespace-nowrap overflow-hidden"
-                  style={{ width: `${(cell.column.getSize() / totalSize) * 100}%` }}
+                  style={{
+                    width: `${(cell.column.getSize() / totalSize) * 100}%`,
+                  }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

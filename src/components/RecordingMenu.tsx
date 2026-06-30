@@ -6,10 +6,19 @@ interface Props {
   recordingId: number;
   collections: Collection[];
   memberCollectionIds: Set<number>;
-  onToggleCollection: (recordingId: number, collectionId: number, isMember: boolean) => void;
+  onToggleCollection: (
+    recordingId: number,
+    collectionId: number,
+    isMember: boolean,
+  ) => void;
 }
 
-export function RecordingMenu({ recordingId, collections, memberCollectionIds, onToggleCollection }: Props) {
+export function RecordingMenu({
+  recordingId,
+  collections,
+  memberCollectionIds,
+  onToggleCollection,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [showCollections, setShowCollections] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -52,7 +61,10 @@ export function RecordingMenu({ recordingId, collections, memberCollectionIds, o
         <div className="absolute right-0 top-7 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-[160px]">
           {!showCollections ? (
             <button
-              onClick={(e) => { e.stopPropagation(); setShowCollections(true); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCollections(true);
+              }}
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Add/remove from collection
@@ -60,13 +72,18 @@ export function RecordingMenu({ recordingId, collections, memberCollectionIds, o
           ) : (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); setShowCollections(false); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCollections(false);
+                }}
                 className="w-full text-left px-3 py-2 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1"
               >
                 ← Collections
               </button>
               {collections.length === 0 && (
-                <p className="px-3 py-2 text-xs text-zinc-500">No collections yet</p>
+                <p className="px-3 py-2 text-xs text-zinc-500">
+                  No collections yet
+                </p>
               )}
               {collections.map((c) => {
                 const isMember = memberCollectionIds.has(c.id);
@@ -83,7 +100,11 @@ export function RecordingMenu({ recordingId, collections, memberCollectionIds, o
                   >
                     <span>{c.name}</span>
                     {isMember && (
-                      <Check size={12} strokeWidth={2} className="shrink-0 text-zinc-400" />
+                      <Check
+                        size={12}
+                        strokeWidth={2}
+                        className="shrink-0 text-zinc-400"
+                      />
                     )}
                   </button>
                 );

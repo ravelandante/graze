@@ -29,7 +29,6 @@ function MetaRow({
   );
 }
 
-
 export function RecordingDetail({ recording, onSave }: Props) {
   const [title, setTitle] = useState(recording.title ?? "");
   const [comment, setComment] = useState(recording.comment ?? "");
@@ -100,15 +99,11 @@ export function RecordingDetail({ recording, onSave }: Props) {
             />
             <MetaRow
               label="Sample rate"
-              value={
-                recording.sampleRate ? `${recording.sampleRate} Hz` : null
-              }
+              value={recording.sampleRate ? `${recording.sampleRate} Hz` : null}
             />
             <MetaRow
               label="Bit depth"
-              value={
-                recording.bitDepth ? `${recording.bitDepth}-bit` : null
-              }
+              value={recording.bitDepth ? `${recording.bitDepth}-bit` : null}
             />
             <MetaRow label="Channels" value={recording.channels} />
 
@@ -126,7 +121,6 @@ export function RecordingDetail({ recording, onSave }: Props) {
             <MetaRow label="Description" value={recording.bwfDescription} />
           </div>
         </section>
-
       </div>
     </div>
   );

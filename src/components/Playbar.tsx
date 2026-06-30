@@ -49,7 +49,9 @@ export function Playbar({
   const [waveformHeight, setWaveformHeight] = useState(() =>
     loadSetting("waveformHeight", 128),
   );
-  const [maxWaveformHeight] = useState(() => Math.floor(window.innerHeight / 3));
+  const [maxWaveformHeight] = useState(() =>
+    Math.floor(window.innerHeight / 3),
+  );
   const [isHeightDragging, setIsHeightDragging] = useState(false);
 
   function startHeightResize(e: React.MouseEvent) {
@@ -63,7 +65,10 @@ export function Playbar({
     document.body.style.userSelect = "none";
 
     function onMouseMove(ev: MouseEvent) {
-      lastHeight = Math.max(64, Math.min(maxWaveformHeight, startHeight + startY - ev.clientY));
+      lastHeight = Math.max(
+        64,
+        Math.min(maxWaveformHeight, startHeight + startY - ev.clientY),
+      );
       setWaveformHeight(lastHeight);
     }
 

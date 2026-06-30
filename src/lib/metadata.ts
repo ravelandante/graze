@@ -28,7 +28,7 @@ export async function extractMetadata(
       ? null
       : typeof rawComment === "string"
         ? rawComment
-        : (rawComment as { text?: string }).text ?? null;
+        : ((rawComment as { text?: string }).text ?? null);
 
   return {
     filePath,

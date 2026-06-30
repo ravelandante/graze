@@ -46,9 +46,9 @@ export function RecordingList({
   const [view, setView] = useState<"list" | "table">(() =>
     loadSetting("viewMode", "list"),
   );
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
-    () => loadSetting("tableColumnVisibility", {}),
-  );
+  const [columnVisibility, setColumnVisibility] = useState<
+    Record<string, boolean>
+  >(() => loadSetting("tableColumnVisibility", {}));
   function handleSetView(next: "list" | "table") {
     setView(next);
     saveSetting("viewMode", next);

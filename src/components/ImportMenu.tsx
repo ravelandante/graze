@@ -23,13 +23,19 @@ export function ImportMenu({ onImport, onImportFolder }: Props) {
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-[140px] z-30">
             <button
-              onClick={() => { setOpen(false); onImport(); }}
+              onClick={() => {
+                setOpen(false);
+                onImport();
+              }}
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Import files
             </button>
             <button
-              onClick={() => { setOpen(false); onImportFolder(); }}
+              onClick={() => {
+                setOpen(false);
+                onImportFolder();
+              }}
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Import folder

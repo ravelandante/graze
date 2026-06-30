@@ -45,10 +45,16 @@ export function RecordingListView({
             >
               {r.title ?? "No title"}
             </p>
-            <p className="text-xs text-zinc-500 mt-0.5 truncate">{r.fileName}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 truncate">
+              {r.fileName}
+            </p>
             <p className="text-xs text-zinc-400 mt-0.5 flex gap-2 min-w-0">
-              <span className="truncate">{r.originator ?? "Unknown device"}</span>
-              <span className="shrink-0">{formatTime(r.durationSeconds ?? 0)}</span>
+              <span className="truncate">
+                {r.originator ?? "Unknown device"}
+              </span>
+              <span className="shrink-0">
+                {formatTime(r.durationSeconds ?? 0)}
+              </span>
             </p>
           </button>
 

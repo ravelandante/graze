@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Group, Panel, Separator, useDefaultLayout, usePanelRef } from "react-resizable-panels";
+import {
+  Group,
+  Panel,
+  Separator,
+  useDefaultLayout,
+  usePanelRef,
+} from "react-resizable-panels";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
@@ -253,7 +259,12 @@ export default function App() {
           onLayoutChanged={onLayoutChanged}
           className="flex-1 min-h-0"
         >
-          <Panel id="list" defaultSize={25} minSize={12} className="flex flex-col">
+          <Panel
+            id="list"
+            defaultSize={25}
+            minSize={12}
+            className="flex flex-col"
+          >
             <RecordingList
               recordings={visibleRecordings}
               selectedId={selectedRecordingId}
@@ -276,11 +287,15 @@ export default function App() {
                   : detailPanelRef.current?.collapse();
               }}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-4 h-6 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700 cursor-pointer"
-              title={isDetailCollapsed ? "Open detail panel" : "Close detail panel"}
+              title={
+                isDetailCollapsed ? "Open detail panel" : "Close detail panel"
+              }
             >
-              {isDetailCollapsed
-                ? <ChevronLeft size={10} strokeWidth={2.5} />
-                : <ChevronRight size={10} strokeWidth={2.5} />}
+              {isDetailCollapsed ? (
+                <ChevronLeft size={10} strokeWidth={2.5} />
+              ) : (
+                <ChevronRight size={10} strokeWidth={2.5} />
+              )}
             </button>
           </Separator>
           <Panel
