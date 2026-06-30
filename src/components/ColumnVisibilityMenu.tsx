@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Columns3 } from "lucide-react";
+import { Check, Columns3 } from "lucide-react";
 
 interface ColumnDef {
   id: string;
@@ -27,22 +27,20 @@ export function ColumnVisibilityMenu({ columns, visibility, onChange }: Props) {
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded shadow-lg py-1 z-30 min-w-36">
+          <div className="absolute right-0 top-7 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-[160px]">
             {columns.map((col) => {
               const visible = visibility[col.id] !== false;
               return (
-                <label
+                <button
                   key={col.id}
-                  className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-zinc-700 text-xs text-zinc-300"
+                  onClick={() => onChange({ ...visibility, [col.id]: !visible })}
+                  className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-2"
                 >
-                  <input
-                    type="checkbox"
-                    checked={visible}
-                    onChange={() => onChange({ ...visibility, [col.id]: !visible })}
-                    className="accent-zinc-400"
-                  />
-                  {col.label}
-                </label>
+                  <span>{col.label}</span>
+                  {visible && (
+                    <Check size={12} strokeWidth={2} className="shrink-0 text-zinc-400" />
+                  )}
+                </button>
               );
             })}
           </div>
