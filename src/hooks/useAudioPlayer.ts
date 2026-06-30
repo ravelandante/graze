@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import type { Recording } from "../types";
+import { loadSetting, saveSetting } from "../lib/settings";
 
 export function useAudioPlayer(
   recordings: Recording[],
@@ -9,14 +10,14 @@ export function useAudioPlayer(
 ) {
   const audio = useRef(new Audio()).current;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLooping, setIsLooping] = useState(false);
-  const [isAutoAdvance, setIsAutoAdvance] = useState(false);
-  const [isAutoplay, setIsAutoplay] = useState(true);
+  const [isLooping, setIsLooping] = useState(() => loadSetting("isLooping", false));
+  const [isAutoAdvance, setIsAutoAdvance] = useState(() => loadSetting("isAutoAdvance", false));
+  const [isAutoplay, setIsAutoplay] = useState(() => loadSetting("isAutoplay", true));
   const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);
-  const isAutoAdvanceRef = useRef(false);
-  const isAutoplayRef = useRef(true);
+  const isAutoAdvanceRef = useRef(isAutoAdvance);
+  const isAutoplayRef = useRef(isAutoplay);
   const selectedIdRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
   recordingsRef.current = recordings;
@@ -24,6 +25,8 @@ export function useAudioPlayer(
   onSelectRef.current = onSelect;
 
   useEffect(() => {
+    audio.loop = isLooping;
+
     function handleEnded() {
       if (!isAutoAdvanceRef.current) {
         setIsPlaying(false);
@@ -46,7 +49,7 @@ export function useAudioPlayer(
       audio.pause();
       audio.src = "";
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedId) {
@@ -89,22 +92,28 @@ export function useAudioPlayer(
 
   const toggleLoop = useCallback(() => {
     setIsLooping((prev) => {
-      audio.loop = !prev;
-      return !prev;
+      const next = !prev;
+      audio.loop = next;
+      saveSetting("isLooping", next);
+      return next;
     });
   }, []);
 
   const toggleAutoAdvance = useCallback(() => {
     setIsAutoAdvance((prev) => {
-      isAutoAdvanceRef.current = !prev;
-      return !prev;
+      const next = !prev;
+      isAutoAdvanceRef.current = next;
+      saveSetting("isAutoAdvance", next);
+      return next;
     });
   }, []);
 
   const toggleAutoplay = useCallback(() => {
     setIsAutoplay((prev) => {
-      isAutoplayRef.current = !prev;
-      return !prev;
+      const next = !prev;
+      isAutoplayRef.current = next;
+      saveSetting("isAutoplay", next);
+      return next;
     });
   }, []);
 

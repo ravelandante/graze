@@ -19,6 +19,7 @@ import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
 import { Playbar } from "./components/Playbar";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
+import { loadSetting, saveSetting } from "./lib/settings";
 import type { Collection, Recording } from "./types";
 
 export default function App() {
@@ -35,10 +36,9 @@ export default function App() {
   >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const [listRatio, setListRatio] = useState(() => {
-    const saved = parseFloat(localStorage.getItem("listRatio") ?? "");
-    return Number.isFinite(saved) ? saved : 288 / window.innerWidth;
-  });
+  const [listRatio, setListRatio] = useState(() =>
+    loadSetting("listRatio", 288 / window.innerWidth),
+  );
   const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
 
   const selectedRecording =
@@ -224,7 +224,7 @@ export default function App() {
     function onMouseUp() {
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      localStorage.setItem("listRatio", String(lastRatio));
+      saveSetting("listRatio", lastRatio);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     }

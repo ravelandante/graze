@@ -3,6 +3,7 @@ import { LayoutList, Table2 } from "lucide-react";
 import type { Collection, Recording } from "../types";
 import { RecordingListView } from "./RecordingListView";
 import { RecordingTableView } from "./RecordingTableView";
+import { loadSetting, saveSetting } from "../lib/settings";
 
 interface Props {
   recordings: Recording[];
@@ -31,7 +32,14 @@ export function RecordingList({
   memberships,
   onToggleCollection,
 }: Props) {
-  const [view, setView] = useState<"list" | "table">("list");
+  const [view, setView] = useState<"list" | "table">(() =>
+    loadSetting("viewMode", "list"),
+  );
+
+  function handleSetView(next: "list" | "table") {
+    setView(next);
+    saveSetting("viewMode", next);
+  }
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -55,14 +63,14 @@ export function RecordingList({
       {/* View toggle */}
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
         <button
-          onClick={() => setView("list")}
+          onClick={() => handleSetView("list")}
           className={`p-1 rounded ${view === "list" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
           title="List view"
         >
           <LayoutList size={14} strokeWidth={1.5} />
         </button>
         <button
-          onClick={() => setView("table")}
+          onClick={() => handleSetView("table")}
           className={`p-1 rounded ${view === "table" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
           title="Table view"
         >
