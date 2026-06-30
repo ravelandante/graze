@@ -11,10 +11,12 @@ interface Props {
   audioEl: HTMLAudioElement;
   isPlaying: boolean;
   isLooping: boolean;
+  isAutoAdvance: boolean;
   onTogglePlay: () => void;
   onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
+  onToggleAutoAdvance: () => void;
   onTrim?: (start: number, end: number) => void;
 }
 
@@ -27,10 +29,12 @@ export function Playbar({
   audioEl,
   isPlaying,
   isLooping,
+  isAutoAdvance,
   onTogglePlay,
   onStop,
   onNext,
   onToggleLoop,
+  onToggleAutoAdvance,
   onTrim,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -120,10 +124,12 @@ export function Playbar({
         currentTime={currentTime}
         isPlaying={isPlaying}
         isLooping={isLooping}
+        isAutoAdvance={isAutoAdvance}
         onTogglePlay={onTogglePlay}
         onStop={onStop}
         onNext={onNext}
         onToggleLoop={onToggleLoop}
+        onToggleAutoAdvance={onToggleAutoAdvance}
       />
     </div>
   );

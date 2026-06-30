@@ -10,8 +10,10 @@ export function useAudioPlayer(
   const audio = useRef(new Audio()).current;
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
+  const [isAutoAdvance, setIsAutoAdvance] = useState(false);
 
   const recordingsRef = useRef(recordings);
+  const isAutoAdvanceRef = useRef(false);
   const selectedIdRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
@@ -26,6 +28,10 @@ export function useAudioPlayer(
 
   useEffect(() => {
     function handleEnded() {
+      if (!isAutoAdvanceRef.current) {
+        setIsPlaying(false);
+        return;
+      }
       const recs = recordingsRef.current;
       const idx = recs.findIndex((r) => r.id === selectedIdRef.current);
       const next = recs[idx + 1];
@@ -84,13 +90,22 @@ export function useAudioPlayer(
     });
   }, []);
 
+  const toggleAutoAdvance = useCallback(() => {
+    setIsAutoAdvance((prev) => {
+      isAutoAdvanceRef.current = !prev;
+      return !prev;
+    });
+  }, []);
+
   return {
     isPlaying,
     isLooping,
+    isAutoAdvance,
     togglePlay,
     stop,
     playNext,
     toggleLoop,
+    toggleAutoAdvance,
     audioEl: audio,
   };
 }

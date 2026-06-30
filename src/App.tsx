@@ -101,10 +101,12 @@ export default function App() {
   const {
     isPlaying,
     isLooping,
+    isAutoAdvance,
     togglePlay,
     stop,
     playNext,
     toggleLoop,
+    toggleAutoAdvance,
     audioEl,
   } = useAudioPlayer(
     visibleRecordings,
@@ -301,10 +303,12 @@ export default function App() {
         audioEl={audioEl}
         isPlaying={isPlaying}
         isLooping={isLooping}
+        isAutoAdvance={isAutoAdvance}
         onTogglePlay={togglePlay}
         onStop={stop}
         onNext={playNext}
         onToggleLoop={toggleLoop}
+        onToggleAutoAdvance={toggleAutoAdvance}
         onTrim={handleTrim}
       />
     </div>

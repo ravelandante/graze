@@ -1,4 +1,11 @@
-import { Pause, Play, Repeat, SkipForward, Square } from "lucide-react";
+import {
+  ChevronsRight,
+  Pause,
+  Play,
+  Repeat,
+  SkipForward,
+  Square,
+} from "lucide-react";
 import type { Recording } from "../types";
 import { formatTime } from "../lib/format";
 
@@ -7,10 +14,12 @@ interface Props {
   currentTime: number;
   isPlaying: boolean;
   isLooping: boolean;
+  isAutoAdvance: boolean;
   onTogglePlay: () => void;
   onStop: () => void;
   onNext: () => void;
   onToggleLoop: () => void;
+  onToggleAutoAdvance: () => void;
 }
 
 export function PlayControls({
@@ -18,10 +27,12 @@ export function PlayControls({
   currentTime,
   isPlaying,
   isLooping,
+  isAutoAdvance,
   onTogglePlay,
   onStop,
   onNext,
   onToggleLoop,
+  onToggleAutoAdvance,
 }: Props) {
   return (
     <div className="h-12 flex items-center px-4 gap-4 border-t border-zinc-800">
@@ -83,8 +94,15 @@ export function PlayControls({
         </button>
       </div>
 
-      {/* Loop */}
-      <div className="flex-1 flex justify-end">
+      {/* Auto-advance + Loop */}
+      <div className="flex-1 flex justify-end gap-1">
+        <button
+          onClick={onToggleAutoAdvance}
+          className={`p-1.5 rounded ${isAutoAdvance ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
+          title="Auto-advance"
+        >
+          <ChevronsRight size={16} strokeWidth={1.5} />
+        </button>
         <button
           onClick={onToggleLoop}
           className={`p-1.5 rounded ${isLooping ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
