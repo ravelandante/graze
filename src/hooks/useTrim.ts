@@ -22,6 +22,8 @@ export function useTrim(
     if (!expanded) {
       regionRef.current?.remove();
       regionRef.current = null;
+    } else {
+      updateRegion();
     }
   }, [expanded]);
 
@@ -43,7 +45,11 @@ export function useTrim(
     });
   }
 
-  function addRegion(regions: RegionsPlugin, inPt: number, outPt: number): Region {
+  function addRegion(
+    regions: RegionsPlugin,
+    inPt: number,
+    outPt: number,
+  ): Region {
     const region = regions.addRegion({
       start: Math.min(inPt, outPt),
       end: Math.max(inPt, outPt),
