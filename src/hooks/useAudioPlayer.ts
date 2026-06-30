@@ -11,6 +11,7 @@ export function useAudioPlayer(
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [isAutoAdvance, setIsAutoAdvance] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);
   const isAutoAdvanceRef = useRef(false);
@@ -32,9 +33,14 @@ export function useAudioPlayer(
       if (next) onSelectRef.current(next.id);
       else setIsPlaying(false);
     }
+    function handleTimeUpdate() {
+      setCurrentTime(audio.currentTime);
+    }
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
     return () => {
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.pause();
       audio.src = "";
     };
@@ -95,6 +101,7 @@ export function useAudioPlayer(
     isPlaying,
     isLooping,
     isAutoAdvance,
+    currentTime,
     togglePlay,
     stop,
     playNext,

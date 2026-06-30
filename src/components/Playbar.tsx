@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
@@ -9,6 +9,7 @@ import { useTrim } from "../hooks/useTrim";
 interface Props {
   recording: Recording | null;
   audioEl: HTMLAudioElement;
+  currentTime: number;
   isPlaying: boolean;
   isLooping: boolean;
   isAutoAdvance: boolean;
@@ -27,6 +28,7 @@ const COMPACT_PAD = 3;
 export function Playbar({
   recording,
   audioEl,
+  currentTime,
   isPlaying,
   isLooping,
   isAutoAdvance,
@@ -38,7 +40,6 @@ export function Playbar({
   onTrim,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
 
   const {
     trimIn,
@@ -50,15 +51,6 @@ export function Playbar({
     handleTrimApply,
     handleClear,
   } = useTrim(audioEl, recording, expanded, onTrim);
-
-  useEffect(() => {
-    const el = audioEl;
-    function onTimeUpdate() {
-      setCurrentTime(el.currentTime);
-    }
-    el.addEventListener("timeupdate", onTimeUpdate);
-    return () => el.removeEventListener("timeupdate", onTimeUpdate);
-  }, [audioEl]);
 
   return (
     <div className="shrink-0 border-t border-zinc-800 bg-zinc-900 relative">

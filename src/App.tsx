@@ -97,6 +97,7 @@ export default function App() {
     isPlaying,
     isLooping,
     isAutoAdvance,
+    currentTime,
     togglePlay,
     stop,
     playNext,
@@ -296,6 +297,7 @@ export default function App() {
       <Playbar
         recording={selectedRecording}
         audioEl={audioEl}
+        currentTime={currentTime}
         isPlaying={isPlaying}
         isLooping={isLooping}
         isAutoAdvance={isAutoAdvance}
