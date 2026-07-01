@@ -1,27 +1,18 @@
 import { useState } from "react";
 import { LayoutList, Table2 } from "lucide-react";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readDir } from "@tauri-apps/plugin-fs";
+import { join } from "@tauri-apps/api/path";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
 import { ImportMenu } from "./ImportMenu";
-import type { Collection, Recording } from "../types";
+import type { Recording } from "../types";
 import { RecordingListView } from "./RecordingListView";
 import { RecordingTableView } from "./RecordingTableView";
 import { loadSetting, saveSetting } from "../lib/settings";
+import { useStore } from "../store";
 
 interface Props {
-  recordings: Recording[];
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-  onImport: () => void;
-  onImportFolder: () => void;
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
-  collections: Collection[];
-  memberships: Map<number, Set<number>>;
-  onToggleCollection: (
-    recordingId: number,
-    collectionId: number,
-    isMember: boolean,
-  ) => void;
+  visibleRecordings: Recording[];
 }
 
 const TABLE_COLUMNS = [
@@ -31,24 +22,19 @@ const TABLE_COLUMNS = [
   { id: "timeRef", label: "TimeRef" },
 ];
 
-export function RecordingList({
-  recordings,
-  selectedId,
-  onSelect,
-  onImport,
-  onImportFolder,
-  searchQuery,
-  onSearchChange,
-  collections,
-  memberships,
-  onToggleCollection,
-}: Props) {
+export function RecordingList({ visibleRecordings }: Props) {
+  const searchQuery = useStore((s) => s.searchQuery);
+  const setSearchQuery = useStore((s) => s.setSearchQuery);
+  const importRecordings = useStore((s) => s.importRecordings);
+  const setStatus = useStore((s) => s.setStatus);
+
   const [view, setView] = useState<"list" | "table">(() =>
     loadSetting("viewMode", "list"),
   );
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(() => loadSetting("tableColumnVisibility", {}));
+
   function handleSetView(next: "list" | "table") {
     setView(next);
     saveSetting("viewMode", next);
@@ -59,21 +45,45 @@ export function RecordingList({
     saveSetting("tableColumnVisibility", next);
   }
 
+  async function handleImport() {
+    const paths = await open({
+      multiple: true,
+      filters: [{ name: "Audio", extensions: ["wav", "mp3"] }],
+    });
+    if (!paths) return;
+    await importRecordings(Array.isArray(paths) ? paths : [paths]);
+  }
+
+  async function handleImportFolder() {
+    const folder = await open({ directory: true });
+    if (!folder || typeof folder !== "string") return;
+    const entries = await readDir(folder);
+    const filePaths = await Promise.all(
+      entries
+        .filter((e) => e.isFile && /\.(wav|mp3)$/i.test(e.name))
+        .map((e) => join(folder, e.name)),
+    );
+    if (filePaths.length === 0) {
+      setStatus("No audio files found in folder");
+      setTimeout(() => setStatus(null), 3000);
+      return;
+    }
+    await importRecordings(filePaths);
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Search + import */}
       <div className="px-3 py-2 border-b border-zinc-800 flex gap-2">
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search recordings…"
           className="flex-1 min-w-0 bg-zinc-800 text-sm text-white placeholder-zinc-500 px-3 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
         />
-        <ImportMenu onImport={onImport} onImportFolder={onImportFolder} />
+        <ImportMenu onImport={handleImport} onImportFolder={handleImportFolder} />
       </div>
 
-      {/* View toggle */}
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
         <button
           onClick={() => handleSetView("list")}
@@ -102,21 +112,10 @@ export function RecordingList({
       </div>
 
       {view === "list" ? (
-        <RecordingListView
-          recordings={recordings}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          searchQuery={searchQuery}
-          collections={collections}
-          memberships={memberships}
-          onToggleCollection={onToggleCollection}
-        />
+        <RecordingListView recordings={visibleRecordings} />
       ) : (
         <RecordingTableView
-          recordings={recordings}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          searchQuery={searchQuery}
+          recordings={visibleRecordings}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={handleColumnVisibilityChange}
         />

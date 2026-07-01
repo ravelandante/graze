@@ -2,33 +2,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import type { Recording } from "../types";
 import { loadSetting, saveSetting } from "../lib/settings";
+import { useStore } from "../store";
 
-export function useAudioPlayer(
-  recordings: Recording[],
-  selectedId: number | null,
-  onSelect: (id: number) => void,
-) {
+export function useAudioPlayer(recordings: Recording[]) {
+  const selectedId = useStore((s) => s.selectedRecordingId);
+  const setSelectedId = useStore((s) => s.setSelectedRecordingId);
+
   const audio = useRef(new Audio()).current;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLooping, setIsLooping] = useState(() =>
-    loadSetting("isLooping", false),
-  );
-  const [isAutoAdvance, setIsAutoAdvance] = useState(() =>
-    loadSetting("isAutoAdvance", false),
-  );
-  const [isAutoplay, setIsAutoplay] = useState(() =>
-    loadSetting("isAutoplay", true),
-  );
+  const [isLooping, setIsLooping] = useState(() => loadSetting("isLooping", false));
+  const [isAutoAdvance, setIsAutoAdvance] = useState(() => loadSetting("isAutoAdvance", false));
+  const [isAutoplay, setIsAutoplay] = useState(() => loadSetting("isAutoplay", true));
   const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);
   const isAutoAdvanceRef = useRef(isAutoAdvance);
   const isAutoplayRef = useRef(isAutoplay);
   const selectedIdRef = useRef(selectedId);
-  const onSelectRef = useRef(onSelect);
+  const setSelectedIdRef = useRef(setSelectedId);
   recordingsRef.current = recordings;
   selectedIdRef.current = selectedId;
-  onSelectRef.current = onSelect;
+  setSelectedIdRef.current = setSelectedId;
 
   useEffect(() => {
     audio.loop = isLooping;
@@ -41,7 +35,7 @@ export function useAudioPlayer(
       const recs = recordingsRef.current;
       const idx = recs.findIndex((r) => r.id === selectedIdRef.current);
       const next = recs[idx + 1];
-      if (next) onSelectRef.current(next.id);
+      if (next) setSelectedIdRef.current(next.id);
       else setIsPlaying(false);
     }
     function handleTimeUpdate() {
@@ -74,7 +68,7 @@ export function useAudioPlayer(
     } else {
       setIsPlaying(false);
     }
-  }, [selectedId]);
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePlay = useCallback(() => {
     if (audio.paused) {
@@ -95,7 +89,7 @@ export function useAudioPlayer(
     const recs = recordingsRef.current;
     const idx = recs.findIndex((r) => r.id === selectedIdRef.current);
     const next = recs[idx + 1];
-    if (next) onSelectRef.current(next.id);
+    if (next) setSelectedIdRef.current(next.id);
   }, []);
 
   const toggleLoop = useCallback(() => {

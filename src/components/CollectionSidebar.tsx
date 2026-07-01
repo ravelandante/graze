@@ -1,24 +1,15 @@
 import { useRef, useState } from "react";
 import { Pencil, Trash } from "lucide-react";
-import type { Collection } from "../types";
+import { useStore } from "../store";
 
-interface Props {
-  collections: Collection[];
-  selectedId: number | null;
-  onSelect: (id: number | null) => void;
-  onCreate: (name: string) => void;
-  onRename: (id: number, name: string) => void;
-  onDelete: (id: number) => void;
-}
+export function CollectionSidebar() {
+  const collections = useStore((s) => s.collections);
+  const selectedId = useStore((s) => s.selectedCollectionId);
+  const setSelectedId = useStore((s) => s.setSelectedCollectionId);
+  const createCollection = useStore((s) => s.createCollection);
+  const renameCollection = useStore((s) => s.renameCollection);
+  const deleteCollection = useStore((s) => s.deleteCollection);
 
-export function CollectionSidebar({
-  collections,
-  selectedId,
-  onSelect,
-  onCreate,
-  onRename,
-  onDelete,
-}: Props) {
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +27,7 @@ export function CollectionSidebar({
     const name = draft.trim();
     setCreating(false);
     setDraft("");
-    if (name) onCreate(name);
+    if (name) createCollection(name);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -47,9 +38,9 @@ export function CollectionSidebar({
     }
   }
 
-  function startRenaming(c: Collection) {
-    setRenamingId(c.id);
-    setRenameDraft(c.name);
+  function startRenaming(id: number, currentName: string) {
+    setRenamingId(id);
+    setRenameDraft(currentName);
   }
 
   function commitRename() {
@@ -57,7 +48,7 @@ export function CollectionSidebar({
     const id = renamingId;
     setRenamingId(null);
     setRenameDraft("");
-    if (id !== null && name) onRename(id, name);
+    if (id !== null && name) renameCollection(id, name);
   }
 
   function handleRenameKeyDown(e: React.KeyboardEvent) {
@@ -85,7 +76,7 @@ export function CollectionSidebar({
 
       <nav className="flex-1 overflow-y-auto py-1">
         <button
-          onClick={() => onSelect(null)}
+          onClick={() => setSelectedId(null)}
           className={`w-full text-left px-4 py-2 text-sm truncate ${
             selectedId === null
               ? "bg-zinc-700 text-white"
@@ -114,7 +105,7 @@ export function CollectionSidebar({
             ) : (
               <>
                 <button
-                  onClick={() => onSelect(c.id)}
+                  onClick={() => setSelectedId(c.id)}
                   className={`flex-1 text-left px-4 py-2 text-sm truncate min-w-0 ${
                     selectedId === c.id ? "text-white" : "text-zinc-300"
                   }`}
@@ -125,7 +116,7 @@ export function CollectionSidebar({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      startRenaming(c);
+                      startRenaming(c.id, c.name);
                     }}
                     className="text-zinc-500 hover:text-zinc-200 p-0.5"
                     title="Rename collection"
@@ -135,7 +126,7 @@ export function CollectionSidebar({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(c.id);
+                      deleteCollection(c.id);
                     }}
                     className="text-zinc-500 hover:text-red-400 p-0.5"
                     title="Delete collection"

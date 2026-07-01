@@ -1,24 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, MoreHorizontal } from "lucide-react";
-import type { Collection } from "../types";
+import { useStore } from "../store";
 
 interface Props {
   recordingId: number;
-  collections: Collection[];
-  memberCollectionIds: Set<number>;
-  onToggleCollection: (
-    recordingId: number,
-    collectionId: number,
-    isMember: boolean,
-  ) => void;
 }
 
-export function RecordingMenu({
-  recordingId,
-  collections,
-  memberCollectionIds,
-  onToggleCollection,
-}: Props) {
+export function RecordingMenu({ recordingId }: Props) {
+  const collections = useStore((s) => s.collections);
+  const memberCollectionIds =
+    useStore((s) => s.recordingMemberships).get(recordingId) ??
+    new Set<number>();
+  const toggleCollectionMembership = useStore(
+    (s) => s.toggleCollectionMembership,
+  );
+
   const [open, setOpen] = useState(false);
   const [showCollections, setShowCollections] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,7 +54,7 @@ export function RecordingMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-7 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-[160px]">
+        <div className="absolute right-0 top-7 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-40">
           {!showCollections ? (
             <button
               onClick={(e) => {
@@ -92,7 +88,7 @@ export function RecordingMenu({
                     key={c.id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onToggleCollection(recordingId, c.id, isMember);
+                      toggleCollectionMembership(recordingId, c.id, isMember);
                       setOpen(false);
                       setShowCollections(false);
                     }}

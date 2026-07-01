@@ -12,12 +12,10 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import type { Recording } from "../types";
 import { formatTimeReference } from "../lib/format";
+import { useStore } from "../store";
 
 interface Props {
   recordings: Recording[];
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-  searchQuery: string;
   columnVisibility: Record<string, boolean>;
   onColumnVisibilityChange: (next: Record<string, boolean>) => void;
 }
@@ -70,12 +68,13 @@ const columns = [
 
 export function RecordingTableView({
   recordings,
-  selectedId,
-  onSelect,
-  searchQuery,
   columnVisibility,
   onColumnVisibilityChange,
 }: Props) {
+  const selectedId = useStore((s) => s.selectedRecordingId);
+  const setSelectedId = useStore((s) => s.setSelectedRecordingId);
+  const searchQuery = useStore((s) => s.searchQuery);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [resizingColumnId, setResizingColumnId] = useState<string | null>(null);
@@ -228,7 +227,7 @@ export function RecordingTableView({
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              onClick={() => onSelect(row.original.id)}
+              onClick={() => setSelectedId(row.original.id)}
               className={`border-b border-zinc-800 cursor-pointer ${
                 selectedId === row.original.id
                   ? "bg-zinc-700"

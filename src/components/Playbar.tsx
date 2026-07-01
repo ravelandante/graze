@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { AudioWaveform, ChevronDown, ChevronUp, Layers } from "lucide-react";
 import { loadSetting, saveSetting } from "../lib/settings";
-import type { Recording } from "../types";
 import { Waveform } from "./Waveform";
 import { Spectrogram } from "./Spectrogram";
 import { PlayControls } from "./PlayControls";
 import { TrimTab } from "./TrimTab";
 import { NormalizeTab } from "./NormalizeTab";
 import { useTrim } from "../hooks/useTrim";
+import { useStore } from "../store";
 
 interface Props {
-  recording: Recording | null;
   audioEl: HTMLAudioElement;
   currentTime: number;
   isPlaying: boolean;
@@ -23,14 +22,11 @@ interface Props {
   onToggleLoop: () => void;
   onToggleAutoAdvance: () => void;
   onToggleAutoplay: () => void;
-  onNormalize?: () => void;
-  onTrim?: (start: number, end: number) => void;
 }
 
 const COMPACT_HEIGHT = 32;
 
 export function Playbar({
-  recording,
   audioEl,
   currentTime,
   isPlaying,
@@ -43,9 +39,12 @@ export function Playbar({
   onToggleLoop,
   onToggleAutoAdvance,
   onToggleAutoplay,
-  onNormalize,
-  onTrim,
 }: Props) {
+  const recording = useStore(
+    (s) => s.recordings.find((r) => r.id === s.selectedRecordingId) ?? null,
+  );
+  const normalizeRecording = useStore((s) => s.normalizeRecording);
+  const trimRecording = useStore((s) => s.trimRecording);
   const [expanded, setExpanded] = useState(false);
   const [playbarMode, setPlaybarMode] = useState<"waveform" | "spectrogram">(
     () => loadSetting("playbarMode", "waveform"),
@@ -98,7 +97,7 @@ export function Playbar({
     handleSetOut,
     handleTrimApply,
     handleClear,
-  } = useTrim(audioEl, recording, expanded, onTrim);
+  } = useTrim(audioEl, recording, expanded, trimRecording);
 
   const displayHeight = expanded ? waveformHeight : COMPACT_HEIGHT;
   const scale = displayHeight / maxWaveformHeight;
@@ -117,7 +116,7 @@ export function Playbar({
 
       {/* Tabs above playbar */}
       <div className="absolute bottom-full right-2 flex items-end gap-1">
-        {expanded && onNormalize && <NormalizeTab onNormalize={onNormalize} />}
+        {expanded && recording && <NormalizeTab onNormalize={normalizeRecording} />}
         {expanded && (
           <TrimTab
             trimIn={trimIn}

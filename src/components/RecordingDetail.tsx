@@ -1,11 +1,6 @@
 import { useState } from "react";
-import type { Recording } from "../types";
 import { formatTimeReference } from "../lib/format";
-
-interface Props {
-  recording: Recording;
-  onSave: (updates: Partial<Recording>) => void;
-}
+import { useStore } from "../store";
 
 function MetaRow({
   label,
@@ -29,13 +24,20 @@ function MetaRow({
   );
 }
 
-export function RecordingDetail({ recording, onSave }: Props) {
-  const [title, setTitle] = useState(recording.title ?? "");
-  const [comment, setComment] = useState(recording.comment ?? "");
+export function RecordingDetail() {
+  const recording = useStore(
+    (s) => s.recordings.find((r) => r.id === s.selectedRecordingId) ?? null,
+  );
+  const saveRecording = useStore((s) => s.saveRecording);
+
+  const [title, setTitle] = useState(recording?.title ?? "");
+  const [comment, setComment] = useState(recording?.comment ?? "");
   const [dirty, setDirty] = useState(false);
 
+  if (!recording) return null;
+
   function handleSave() {
-    onSave({ title: title || null, comment: comment || null });
+    saveRecording({ title: title || null, comment: comment || null });
     setDirty(false);
   }
 

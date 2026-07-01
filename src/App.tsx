@@ -7,81 +7,32 @@ import {
   usePanelRef,
 } from "react-resizable-panels";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { open } from "@tauri-apps/plugin-dialog";
-import {
-  addRecordingToCollection,
-  removeRecordingFromCollection,
-  deleteCollection,
-  renameCollection,
-  fetchCollections,
-  fetchMemberships,
-  fetchRecordings,
-  insertCollection,
-  insertRecording,
-  updateRecording,
-} from "./lib/db";
-import { extractMetadata } from "./lib/metadata";
-import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
-import { readDir } from "@tauri-apps/plugin-fs";
-import { join } from "@tauri-apps/api/path";
+import { useStore } from "./store";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
 import { Playbar } from "./components/Playbar";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
-import type { Collection, Recording } from "./types";
 
 export default function App() {
-  const [recordings, setRecordings] = useState<Recording[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [memberships, setMemberships] = useState<Map<number, Set<number>>>(
-    new Map(),
-  );
-  const [selectedRecordingId, setSelectedRecordingId] = useState<number | null>(
-    null,
-  );
-  const [selectedCollectionId, setSelectedCollectionId] = useState<
-    number | null
-  >(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
+  const recordings = useStore((s) => s.recordings);
+  const memberships = useStore((s) => s.memberships);
+  const selectedCollectionId = useStore((s) => s.selectedCollectionId);
+  const searchQuery = useStore((s) => s.searchQuery);
+  const selectedRecordingId = useStore((s) => s.selectedRecordingId);
+  const status = useStore((s) => s.status);
+  const loadAll = useStore((s) => s.loadAll);
+
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "graze-main",
     storage: localStorage,
   });
-
   const detailPanelRef = usePanelRef();
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
-
-  const selectedRecording =
-    recordings.find((r) => r.id === selectedRecordingId) ?? null;
-
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  async function loadAll() {
-    const [recs, cols, mems] = await Promise.all([
-      fetchRecordings(),
-      fetchCollections(),
-      fetchMemberships(),
-    ]);
-    setRecordings(recs);
-    setCollections(cols);
-    setMemberships(mems);
-  }
-
-  const recordingMemberships = useMemo(() => {
-    const map = new Map<number, Set<number>>();
-    for (const [collectionId, recordingIds] of memberships) {
-      for (const recordingId of recordingIds) {
-        if (!map.has(recordingId)) map.set(recordingId, new Set());
-        map.get(recordingId)!.add(collectionId);
-      }
-    }
-    return map;
-  }, [memberships]);
 
   const visibleRecordings = useMemo(() => {
     const collectionIds =
@@ -105,6 +56,7 @@ export default function App() {
     isPlaying,
     isLooping,
     isAutoAdvance,
+    isAutoplay,
     currentTime,
     togglePlay,
     stop,
@@ -112,147 +64,13 @@ export default function App() {
     toggleLoop,
     toggleAutoAdvance,
     toggleAutoplay,
-    isAutoplay,
     audioEl,
-  } = useAudioPlayer(
-    visibleRecordings,
-    selectedRecordingId,
-    setSelectedRecordingId,
-  );
-
-  async function importPaths(filePaths: string[]) {
-    setStatus(`Importing ${filePaths.length} file(s)…`);
-    for (const filePath of filePaths) {
-      try {
-        const meta = await extractMetadata(filePath);
-        await insertRecording(meta);
-      } catch (err) {
-        console.error("Failed to import", filePath, err);
-      }
-    }
-    setStatus(null);
-    await loadAll();
-  }
-
-  async function handleImport() {
-    const paths = await open({
-      multiple: true,
-      filters: [{ name: "Audio", extensions: ["wav", "mp3"] }],
-    });
-    if (!paths) return;
-    await importPaths(Array.isArray(paths) ? paths : [paths]);
-  }
-
-  async function handleImportFolder() {
-    const folder = await open({ directory: true });
-    if (!folder || typeof folder !== "string") return;
-    const entries = await readDir(folder);
-    const filePaths = await Promise.all(
-      entries
-        .filter((e) => e.isFile && /\.(wav|mp3)$/i.test(e.name))
-        .map((e) => join(folder, e.name)),
-    );
-    if (filePaths.length === 0) {
-      setStatus("No audio files found in folder");
-      setTimeout(() => setStatus(null), 3000);
-      return;
-    }
-    await importPaths(filePaths);
-  }
-
-  async function handleSaveRecording(updates: Partial<Recording>) {
-    if (!selectedRecordingId || !selectedRecording) return;
-    setStatus("Saving…");
-    try {
-      await writeFileMetadata(selectedRecording.filePath, {
-        title: updates.title,
-        comment: updates.comment,
-      });
-    } catch (err) {
-      setStatus("File write failed: " + String(err));
-      setTimeout(() => setStatus(null), 5000);
-      return;
-    }
-    await updateRecording(selectedRecordingId, {
-      title: updates.title ?? null,
-      comment: updates.comment ?? null,
-    });
-    setStatus(null);
-    await loadAll();
-  }
-
-  async function handleNormalize() {
-    if (!selectedRecording) return;
-    const outPath = selectedRecording.filePath.replace(
-      /(\.\w+)$/,
-      "_normalized$1",
-    );
-    setStatus("Normalizing…");
-    try {
-      await normalizeFile(selectedRecording.filePath, outPath);
-      setStatus("Normalized → " + outPath.split("/").pop());
-    } catch (err) {
-      setStatus("Normalize failed: " + String(err));
-    }
-    setTimeout(() => setStatus(null), 4000);
-  }
-
-  async function handleTrim(start: number, end: number) {
-    if (!selectedRecording) return;
-    const outPath = selectedRecording.filePath.replace(
-      /(\.\w+)$/,
-      `_trim${start}-${end}$1`,
-    );
-    setStatus("Trimming…");
-    try {
-      await trimFile(selectedRecording.filePath, outPath, start, end);
-      setStatus("Trimmed → " + outPath.split("/").pop());
-    } catch (err) {
-      setStatus("Trim failed: " + String(err));
-    }
-    setTimeout(() => setStatus(null), 4000);
-  }
-
-  async function handleCreateCollection(name: string) {
-    await insertCollection(name);
-    await loadAll();
-  }
-
-  async function handleRenameCollection(id: number, name: string) {
-    await renameCollection(id, name);
-    await loadAll();
-  }
-
-  async function handleDeleteCollection(id: number) {
-    if (selectedCollectionId === id) setSelectedCollectionId(null);
-    await deleteCollection(id);
-    await loadAll();
-  }
-
-  async function handleToggleCollection(
-    recordingId: number,
-    collectionId: number,
-    isMember: boolean,
-  ) {
-    if (isMember) {
-      await removeRecordingFromCollection(recordingId, collectionId);
-    } else {
-      await addRecordingToCollection(recordingId, collectionId);
-    }
-    await loadAll();
-  }
+  } = useAudioPlayer(visibleRecordings);
 
   return (
     <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden">
       <div className="flex flex-1 min-h-0">
-        <CollectionSidebar
-          collections={collections}
-          selectedId={selectedCollectionId}
-          onSelect={setSelectedCollectionId}
-          onCreate={handleCreateCollection}
-          onRename={handleRenameCollection}
-          onDelete={handleDeleteCollection}
-        />
+        <CollectionSidebar />
         <Group
           orientation="horizontal"
           defaultLayout={defaultLayout}
@@ -265,18 +83,7 @@ export default function App() {
             minSize={12}
             className="flex flex-col"
           >
-            <RecordingList
-              recordings={visibleRecordings}
-              selectedId={selectedRecordingId}
-              onSelect={setSelectedRecordingId}
-              onImport={handleImport}
-              onImportFolder={handleImportFolder}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              collections={collections}
-              memberships={recordingMemberships}
-              onToggleCollection={handleToggleCollection}
-            />
+            <RecordingList visibleRecordings={visibleRecordings} />
           </Panel>
           <Separator className="relative w-1 bg-zinc-800 hover:bg-zinc-600 transition-colors cursor-col-resize overflow-visible">
             <button
@@ -308,12 +115,8 @@ export default function App() {
             className="flex flex-col overflow-hidden"
           >
             <main className="flex-1 flex flex-col overflow-hidden">
-              {selectedRecording ? (
-                <RecordingDetail
-                  key={selectedRecording.id}
-                  recording={selectedRecording}
-                  onSave={handleSaveRecording}
-                />
+              {selectedRecordingId ? (
+                <RecordingDetail key={selectedRecordingId} />
               ) : (
                 <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
                   Select a recording
@@ -329,7 +132,6 @@ export default function App() {
         </div>
       )}
       <Playbar
-        recording={selectedRecording}
         audioEl={audioEl}
         currentTime={currentTime}
         isPlaying={isPlaying}
@@ -342,8 +144,6 @@ export default function App() {
         onToggleLoop={toggleLoop}
         onToggleAutoAdvance={toggleAutoAdvance}
         onToggleAutoplay={toggleAutoplay}
-        onNormalize={selectedRecording ? handleNormalize : undefined}
-        onTrim={handleTrim}
       />
     </div>
   );
