@@ -14,6 +14,7 @@ import type { Recording } from "../types";
 import { formatTimeReference } from "../lib/format";
 import { useStore } from "../store";
 import { RecordingContextMenu } from "./RecordingContextMenu";
+import { useRecordingSelection } from "../hooks/useRecordingSelection";
 
 interface Props {
   recordings: Recording[];
@@ -72,9 +73,9 @@ export function RecordingTableView({
   columnVisibility,
   onColumnVisibilityChange,
 }: Props) {
-  const selectedId = useStore((s) => s.selectedRecordingId);
-  const setSelectedId = useStore((s) => s.setSelectedRecordingId);
   const searchQuery = useStore((s) => s.searchQuery);
+  const { selectedIds, handleClick, handleMouseDown, handleContextMenu } =
+    useRecordingSelection(recordings);
 
   const [contextMenu, setContextMenu] = useState<{
     recordingId: number;
@@ -82,9 +83,8 @@ export function RecordingTableView({
     y: number;
   } | null>(null);
 
-  function handleContextMenu(e: React.MouseEvent, recordingId: number) {
-    e.preventDefault();
-    setSelectedId(recordingId);
+  function onContextMenu(e: React.MouseEvent, recordingId: number) {
+    handleContextMenu(e, recordingId);
     setContextMenu({ recordingId, x: e.clientX, y: e.clientY });
   }
 
@@ -240,10 +240,11 @@ export function RecordingTableView({
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              onClick={() => setSelectedId(row.original.id)}
-              onContextMenu={(e) => handleContextMenu(e, row.original.id)}
-              className={`border-b border-zinc-800 cursor-pointer ${
-                selectedId === row.original.id
+              onMouseDown={handleMouseDown}
+              onClick={(e) => handleClick(e, row.original.id)}
+              onContextMenu={(e) => onContextMenu(e, row.original.id)}
+              className={`border-b border-zinc-800 cursor-pointer select-none ${
+                selectedIds.has(row.original.id)
                   ? "bg-zinc-700"
                   : "hover:bg-zinc-800"
               }`}

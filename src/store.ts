@@ -24,12 +24,14 @@ interface AppState {
   recordingMemberships: Map<number, Set<number>>;
 
   selectedRecordingId: number | null;
+  selectedIds: Set<number>;
   selectedCollectionId: number | null;
   searchQuery: string;
   status: string | null;
 
   loadAll: () => Promise<void>;
   setSelectedRecordingId: (id: number | null) => void;
+  setSelectedIds: (ids: Set<number>) => void;
   setSelectedCollectionId: (id: number | null) => void;
   setSearchQuery: (q: string) => void;
   setStatus: (s: string | null) => void;
@@ -68,6 +70,7 @@ export const useStore = create<AppState>((set, get) => ({
   memberships: new Map(),
   recordingMemberships: new Map(),
   selectedRecordingId: null,
+  selectedIds: new Set<number>(),
   selectedCollectionId: null,
   searchQuery: "",
   status: null,
@@ -81,7 +84,17 @@ export const useStore = create<AppState>((set, get) => ({
     set({ recordings, collections, memberships, recordingMemberships: invertMemberships(memberships) });
   },
 
-  setSelectedRecordingId: (id) => set({ selectedRecordingId: id }),
+  setSelectedRecordingId: (id) => {
+    const { selectedIds } = get();
+    // Keep selectedIds in sync when not in a multi-selection
+    set({
+      selectedRecordingId: id,
+      ...(selectedIds.size <= 1
+        ? { selectedIds: id !== null ? new Set([id]) : new Set<number>() }
+        : {}),
+    });
+  },
+  setSelectedIds: (ids) => set({ selectedIds: ids }),
   setSelectedCollectionId: (id) => set({ selectedCollectionId: id }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStatus: (s) => set({ status: s }),

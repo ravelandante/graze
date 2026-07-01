@@ -3,6 +3,7 @@ import type { Recording } from "../types";
 import { RecordingContextMenu } from "./RecordingContextMenu";
 import { formatTime } from "../lib/format";
 import { useStore } from "../store";
+import { useRecordingSelection } from "../hooks/useRecordingSelection";
 
 interface Props {
   recordings: Recording[];
@@ -15,20 +16,20 @@ interface ContextMenuState {
 }
 
 export function RecordingListView({ recordings }: Props) {
-  const selectedId = useStore((s) => s.selectedRecordingId);
-  const setSelectedId = useStore((s) => s.setSelectedRecordingId);
   const searchQuery = useStore((s) => s.searchQuery);
+  const { selectedIds, handleClick, handleMouseDown, handleContextMenu } =
+    useRecordingSelection(recordings);
+
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  function handleContextMenu(e: React.MouseEvent, recordingId: number) {
-    e.preventDefault();
-    setSelectedId(recordingId);
+  function onContextMenu(e: React.MouseEvent, recordingId: number) {
+    handleContextMenu(e, recordingId);
     setContextMenu({ recordingId, x: e.clientX, y: e.clientY });
   }
 
   return (
     <>
-      <ul className="flex-1 overflow-y-auto">
+      <ul className="flex-1 overflow-y-auto select-none">
         {recordings.length === 0 && (
           <li className="text-zinc-500 text-sm text-center py-10 px-4">
             {searchQuery ? "No results" : "Import recordings to get started"}
@@ -37,10 +38,11 @@ export function RecordingListView({ recordings }: Props) {
         {recordings.map((r) => (
           <li key={r.id}>
             <button
-              onClick={() => setSelectedId(r.id)}
-              onContextMenu={(e) => handleContextMenu(e, r.id)}
+              onMouseDown={handleMouseDown}
+              onClick={(e) => handleClick(e, r.id)}
+              onContextMenu={(e) => onContextMenu(e, r.id)}
               className={`w-full text-left px-4 py-3 border-b border-zinc-800 ${
-                selectedId === r.id ? "bg-zinc-700" : "hover:bg-zinc-800"
+                selectedIds.has(r.id) ? "bg-zinc-700" : "hover:bg-zinc-800"
               }`}
             >
               <p
