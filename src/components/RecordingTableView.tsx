@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { Recording } from "../types";
 import { formatTimeReference } from "../lib/format";
 import { useStore } from "../store";
+import { RecordingContextMenu } from "./RecordingContextMenu";
 
 interface Props {
   recordings: Recording[];
@@ -74,6 +75,18 @@ export function RecordingTableView({
   const selectedId = useStore((s) => s.selectedRecordingId);
   const setSelectedId = useStore((s) => s.setSelectedRecordingId);
   const searchQuery = useStore((s) => s.searchQuery);
+
+  const [contextMenu, setContextMenu] = useState<{
+    recordingId: number;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  function handleContextMenu(e: React.MouseEvent, recordingId: number) {
+    e.preventDefault();
+    setSelectedId(recordingId);
+    setContextMenu({ recordingId, x: e.clientX, y: e.clientY });
+  }
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
@@ -228,6 +241,7 @@ export function RecordingTableView({
             <tr
               key={row.id}
               onClick={() => setSelectedId(row.original.id)}
+              onContextMenu={(e) => handleContextMenu(e, row.original.id)}
               className={`border-b border-zinc-800 cursor-pointer ${
                 selectedId === row.original.id
                   ? "bg-zinc-700"
@@ -249,6 +263,14 @@ export function RecordingTableView({
           ))}
         </tbody>
       </table>
+      {contextMenu && (
+        <RecordingContextMenu
+          recordingId={contextMenu.recordingId}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 }
