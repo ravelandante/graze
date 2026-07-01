@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Pencil, Trash } from "lucide-react";
 import { useStore } from "../store";
+import { useRecordingDropTargets } from "../hooks/useRecordingDropTargets";
 
 export function CollectionSidebar() {
   const collections = useStore((s) => s.collections);
@@ -9,6 +10,8 @@ export function CollectionSidebar() {
   const createCollection = useStore((s) => s.createCollection);
   const renameCollection = useStore((s) => s.renameCollection);
   const deleteCollection = useStore((s) => s.deleteCollection);
+  const addRecordingsToCollection = useStore((s) => s.addRecordingsToCollection);
+  const { dragOverId, getDropProps } = useRecordingDropTargets(addRecordingsToCollection);
 
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
@@ -89,8 +92,13 @@ export function CollectionSidebar() {
         {collections.map((c) => (
           <div
             key={c.id}
-            className={`group flex items-center ${
-              selectedId === c.id ? "bg-zinc-700" : "hover:bg-zinc-800"
+            {...getDropProps(c.id)}
+            className={`group flex items-center transition-colors ${
+              dragOverId === c.id
+                ? "bg-zinc-600 ring-1 ring-inset ring-zinc-500"
+                : selectedId === c.id
+                  ? "bg-zinc-700"
+                  : "hover:bg-zinc-800"
             }`}
           >
             {renamingId === c.id ? (

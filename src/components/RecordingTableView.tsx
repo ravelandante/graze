@@ -74,7 +74,7 @@ export function RecordingTableView({
   onColumnVisibilityChange,
 }: Props) {
   const searchQuery = useStore((s) => s.searchQuery);
-  const { selectedIds, handleClick, handleMouseDown, handleContextMenu } =
+  const { selectedIds, handleClick, handleMouseDown, handleContextMenu, getDragProps } =
     useRecordingSelection(recordings);
 
   const [contextMenu, setContextMenu] = useState<{
@@ -243,6 +243,7 @@ export function RecordingTableView({
               onMouseDown={handleMouseDown}
               onClick={(e) => handleClick(e, row.original.id)}
               onContextMenu={(e) => onContextMenu(e, row.original.id)}
+              {...getDragProps(row.original.id)}
               className={`border-b border-zinc-800 cursor-pointer select-none ${
                 selectedIds.has(row.original.id)
                   ? "bg-zinc-700"

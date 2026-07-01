@@ -17,7 +17,7 @@ interface ContextMenuState {
 
 export function RecordingListView({ recordings }: Props) {
   const searchQuery = useStore((s) => s.searchQuery);
-  const { selectedIds, handleClick, handleMouseDown, handleContextMenu } =
+  const { selectedIds, handleClick, handleMouseDown, handleContextMenu, getDragProps } =
     useRecordingSelection(recordings);
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -41,6 +41,7 @@ export function RecordingListView({ recordings }: Props) {
               onMouseDown={handleMouseDown}
               onClick={(e) => handleClick(e, r.id)}
               onContextMenu={(e) => onContextMenu(e, r.id)}
+              {...getDragProps(r.id)}
               className={`w-full text-left px-4 py-3 border-b border-zinc-800 ${
                 selectedIds.has(r.id) ? "bg-zinc-700" : "hover:bg-zinc-800"
               }`}

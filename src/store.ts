@@ -46,6 +46,7 @@ interface AppState {
   ) => Promise<void>;
 
   importRecordings: (filePaths: string[]) => Promise<void>;
+  addRecordingsToCollection: (recordingIds: number[], collectionId: number) => Promise<void>;
   saveRecording: (updates: Partial<Recording>) => Promise<void>;
   normalizeRecording: () => Promise<void>;
   trimRecording: (start: number, end: number) => Promise<void>;
@@ -120,6 +121,15 @@ export const useStore = create<AppState>((set, get) => ({
       await removeRecordingFromCollection(recordingId, collectionId);
     } else {
       await addRecordingToCollection(recordingId, collectionId);
+    }
+    await get().loadAll();
+  },
+
+  addRecordingsToCollection: async (recordingIds, collectionId) => {
+    const { recordingMemberships } = get();
+    for (const recordingId of recordingIds) {
+      const alreadyMember = recordingMemberships.get(recordingId)?.has(collectionId) ?? false;
+      if (!alreadyMember) await addRecordingToCollection(recordingId, collectionId);
     }
     await get().loadAll();
   },
