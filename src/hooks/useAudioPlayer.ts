@@ -10,9 +10,15 @@ export function useAudioPlayer(recordings: Recording[]) {
 
   const audio = useRef(new Audio()).current;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLooping, setIsLooping] = useState(() => loadSetting("isLooping", false));
-  const [isAutoAdvance, setIsAutoAdvance] = useState(() => loadSetting("isAutoAdvance", false));
-  const [isAutoplay, setIsAutoplay] = useState(() => loadSetting("isAutoplay", true));
+  const [isLooping, setIsLooping] = useState(() =>
+    loadSetting("isLooping", false),
+  );
+  const [isAutoAdvance, setIsAutoAdvance] = useState(() =>
+    loadSetting("isAutoAdvance", false),
+  );
+  const [isAutoplay, setIsAutoplay] = useState(() =>
+    loadSetting("isAutoplay", true),
+  );
   const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);

@@ -58,7 +58,9 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
       if (el?.duration) ws.seekTo(el.currentTime / el.duration);
     });
 
-    return () => { ws.destroy(); };
+    return () => {
+      ws.destroy();
+    };
   }, [filePath, height]);
 
   function handleClick(e: React.MouseEvent) {
@@ -72,7 +74,14 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
     <div className="relative w-full" style={{ height }}>
       <div
         ref={waveformRef}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, overflow: "hidden" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 1,
+          overflow: "hidden",
+        }}
       />
       <div
         ref={spectrogramRef}
@@ -82,7 +91,12 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
       />
       <div
         className="absolute top-0 bottom-0 pointer-events-none"
-        style={{ left: `${cursorPct}%`, width: 1, background: "rgba(228,228,231,0.5)", zIndex: 10 }}
+        style={{
+          left: `${cursorPct}%`,
+          width: 1,
+          background: "rgba(228,228,231,0.5)",
+          zIndex: 10,
+        }}
       />
     </div>
   );

@@ -68,7 +68,11 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
             className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
           >
             <span>Edit collection</span>
-            <ChevronRight size={12} strokeWidth={1.5} className="shrink-0 text-zinc-500" />
+            <ChevronRight
+              size={12}
+              strokeWidth={1.5}
+              className="shrink-0 text-zinc-500"
+            />
           </button>
         ) : (
           <>

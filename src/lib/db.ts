@@ -141,7 +141,10 @@ export async function deleteCollection(id: number): Promise<void> {
   await d.execute("DELETE FROM collections WHERE id = ?", [id]);
 }
 
-export async function renameCollection(id: number, name: string): Promise<void> {
+export async function renameCollection(
+  id: number,
+  name: string,
+): Promise<void> {
   const d = await getDb();
   await d.execute("UPDATE collections SET name = ? WHERE id = ?", [name, id]);
 }

@@ -21,7 +21,7 @@ export function ImportMenu({ onImport, onImportFolder }: Props) {
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-[140px] z-30">
+          <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-35 z-30">
             <button
               onClick={() => {
                 setOpen(false);

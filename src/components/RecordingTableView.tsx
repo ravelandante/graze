@@ -74,8 +74,13 @@ export function RecordingTableView({
   onColumnVisibilityChange,
 }: Props) {
   const searchQuery = useStore((s) => s.searchQuery);
-  const { selectedIds, handleClick, handleMouseDown, handleContextMenu, getDragProps } =
-    useRecordingSelection(recordings);
+  const {
+    selectedIds,
+    handleClick,
+    handleMouseDown,
+    handleContextMenu,
+    getDragProps,
+  } = useRecordingSelection(recordings);
 
   const [contextMenu, setContextMenu] = useState<{
     recordingId: number;

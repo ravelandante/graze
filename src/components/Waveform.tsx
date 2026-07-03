@@ -11,7 +11,14 @@ interface Props {
   onReady?: (ws: WaveSurfer) => void;
 }
 
-export function Waveform({ filePath, height = 64, peaks, duration, audioEl, onReady }: Props) {
+export function Waveform({
+  filePath,
+  height = 64,
+  peaks,
+  duration,
+  audioEl,
+  onReady,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const audioElRef = useRef(audioEl);

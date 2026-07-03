@@ -52,7 +52,10 @@ interface AppState {
   ) => Promise<void>;
 
   importRecordings: (filePaths: string[]) => Promise<void>;
-  addRecordingsToCollection: (recordingIds: number[], collectionId: number) => Promise<void>;
+  addRecordingsToCollection: (
+    recordingIds: number[],
+    collectionId: number,
+  ) => Promise<void>;
   saveRecording: (updates: Partial<Recording>) => Promise<void>;
   normalizeRecording: () => Promise<void>;
   trimRecording: (start: number, end: number) => Promise<void>;
@@ -142,7 +145,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   setSelectedRecordingId: (id) => {
     const { selectedIds } = get();
-    // Keep selectedIds in sync when not in a multi-selection
+    // keep selectedIds in sync when not in a multi-selection
     set({
       selectedRecordingId: id,
       ...(selectedIds.size <= 1
@@ -183,8 +186,10 @@ export const useStore = create<AppState>((set, get) => ({
   addRecordingsToCollection: async (recordingIds, collectionId) => {
     const { recordingMemberships } = get();
     for (const recordingId of recordingIds) {
-      const alreadyMember = recordingMemberships.get(recordingId)?.has(collectionId) ?? false;
-      if (!alreadyMember) await addRecordingToCollection(recordingId, collectionId);
+      const alreadyMember =
+        recordingMemberships.get(recordingId)?.has(collectionId) ?? false;
+      if (!alreadyMember)
+        await addRecordingToCollection(recordingId, collectionId);
     }
     await get().loadAll();
   },

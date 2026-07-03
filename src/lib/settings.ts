@@ -14,7 +14,9 @@ export function loadSetting<K extends keyof SettingMap>(
 ): SettingMap[K] {
   try {
     const stored = localStorage.getItem(key);
-    return stored !== null ? (JSON.parse(stored) as SettingMap[K]) : defaultValue;
+    return stored !== null
+      ? (JSON.parse(stored) as SettingMap[K])
+      : defaultValue;
   } catch {
     return defaultValue;
   }

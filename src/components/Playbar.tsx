@@ -44,7 +44,9 @@ export function Playbar({
     (s) => s.recordings.find((r) => r.id === s.selectedRecordingId) ?? null,
   );
   const peaks = useStore((s) =>
-    s.selectedRecordingId != null ? (s.peaksMap.get(s.selectedRecordingId) ?? undefined) : undefined,
+    s.selectedRecordingId != null
+      ? (s.peaksMap.get(s.selectedRecordingId) ?? undefined)
+      : undefined,
   );
   const normalizeRecording = useStore((s) => s.normalizeRecording);
   const trimRecording = useStore((s) => s.trimRecording);
@@ -119,7 +121,9 @@ export function Playbar({
 
       {/* Tabs above playbar */}
       <div className="absolute bottom-full right-2 flex items-end gap-1">
-        {expanded && recording && <NormalizeTab onNormalize={normalizeRecording} />}
+        {expanded && recording && (
+          <NormalizeTab onNormalize={normalizeRecording} />
+        )}
         {expanded && (
           <TrimTab
             trimIn={trimIn}
@@ -134,12 +138,17 @@ export function Playbar({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            const next = playbarMode === "waveform" ? "spectrogram" : "waveform";
+            const next =
+              playbarMode === "waveform" ? "spectrogram" : "waveform";
             setPlaybarMode(next);
             saveSetting("playbarMode", next);
           }}
           className={`bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center ${playbarMode === "spectrogram" ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
-          title={playbarMode === "waveform" ? "Switch to spectrogram" : "Switch to waveform"}
+          title={
+            playbarMode === "waveform"
+              ? "Switch to spectrogram"
+              : "Switch to waveform"
+          }
         >
           {playbarMode === "waveform" ? (
             <Layers size={12} strokeWidth={1.5} />

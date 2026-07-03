@@ -17,8 +17,13 @@ interface ContextMenuState {
 
 export function RecordingListView({ recordings }: Props) {
   const searchQuery = useStore((s) => s.searchQuery);
-  const { selectedIds, handleClick, handleMouseDown, handleContextMenu, getDragProps } =
-    useRecordingSelection(recordings);
+  const {
+    selectedIds,
+    handleClick,
+    handleMouseDown,
+    handleContextMenu,
+    getDragProps,
+  } = useRecordingSelection(recordings);
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 

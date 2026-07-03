@@ -10,8 +10,12 @@ export function CollectionSidebar() {
   const createCollection = useStore((s) => s.createCollection);
   const renameCollection = useStore((s) => s.renameCollection);
   const deleteCollection = useStore((s) => s.deleteCollection);
-  const addRecordingsToCollection = useStore((s) => s.addRecordingsToCollection);
-  const { dragOverId, getDropProps } = useRecordingDropTargets(addRecordingsToCollection);
+  const addRecordingsToCollection = useStore(
+    (s) => s.addRecordingsToCollection,
+  );
+  const { dragOverId, getDropProps } = useRecordingDropTargets(
+    addRecordingsToCollection,
+  );
 
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");

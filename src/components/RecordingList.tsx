@@ -81,7 +81,10 @@ export function RecordingList({ visibleRecordings }: Props) {
           placeholder="Search recordings…"
           className="flex-1 min-w-0 bg-zinc-800 text-sm text-white placeholder-zinc-500 px-3 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-zinc-500"
         />
-        <ImportMenu onImport={handleImport} onImportFolder={handleImportFolder} />
+        <ImportMenu
+          onImport={handleImport}
+          onImportFolder={handleImportFolder}
+        />
       </div>
 
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
