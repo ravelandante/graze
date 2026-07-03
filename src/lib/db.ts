@@ -170,6 +170,28 @@ export async function addRecordingToCollection(
   );
 }
 
+export async function getExistingPeaks(): Promise<Map<number, number[][]>> {
+  const d = await getDb();
+  const rows = await d.select<{ id: number; peaks: string }[]>(
+    "SELECT id, peaks FROM recordings WHERE peaks IS NOT NULL",
+  );
+  const map = new Map<number, number[][]>();
+  for (const { id, peaks } of rows) {
+    try {
+      map.set(id, JSON.parse(peaks));
+    } catch {}
+  }
+  return map;
+}
+
+export async function savePeaks(id: number, peaks: number[][]): Promise<void> {
+  const d = await getDb();
+  await d.execute("UPDATE recordings SET peaks = ? WHERE id = ?", [
+    JSON.stringify(peaks),
+    id,
+  ]);
+}
+
 export async function removeRecordingFromCollection(
   recordingId: number,
   collectionId: number,
