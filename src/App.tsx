@@ -22,10 +22,11 @@ export default function App() {
   const selectedRecordingId = useStore((s) => s.selectedRecordingId);
   const status = useStore((s) => s.status);
   const loadAll = useStore((s) => s.loadAll);
+  const startPeakComputation = useStore((s) => s.startPeakComputation);
 
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    loadAll().then(() => startPeakComputation());
+  }, [loadAll, startPeakComputation]);
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "graze-main",
