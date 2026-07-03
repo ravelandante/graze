@@ -150,7 +150,7 @@ export function Playbar({
             setStereo((v) => !v);
           }}
           disabled={!isStereo}
-          className={`bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center disabled:opacity-30 disabled:cursor-not-allowed ${stereo && isStereo ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
+          className="bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center text-zinc-600 hover:text-zinc-400 disabled:opacity-30 disabled:cursor-not-allowed"
           title={
             !isStereo
               ? "Mono recording"
@@ -173,7 +173,7 @@ export function Playbar({
             setPlaybarMode(next);
             saveSetting("playbarMode", next);
           }}
-          className={`bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center ${playbarMode === "spectrogram" ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
+          className="bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center text-zinc-600 hover:text-zinc-400"
           title={
             playbarMode === "waveform"
               ? "Switch to spectrogram"
