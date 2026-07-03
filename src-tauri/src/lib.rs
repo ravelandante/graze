@@ -1,3 +1,6 @@
+mod metadata;
+pub use metadata::RecordingMeta;
+
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::DecoderOptions;
 use symphonia::core::formats::FormatOptions;
@@ -132,7 +135,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![compute_peaks])
+        .invoke_handler(tauri::generate_handler![
+            compute_peaks,
+            metadata::extract_metadata
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

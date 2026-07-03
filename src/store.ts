@@ -185,7 +185,9 @@ export const useStore = create<AppState>((set, get) => ({
     set({
       recordings: get().recordings.filter((r) => !idSet.has(r.id)),
       peaksMap: nextPeaksMap,
-      selectedRecordingId: idSet.has(selectedRecordingId!) ? null : selectedRecordingId,
+      selectedRecordingId: idSet.has(selectedRecordingId!)
+        ? null
+        : selectedRecordingId,
       selectedIds: new Set([...selectedIds].filter((id) => !idSet.has(id))),
     });
   },
