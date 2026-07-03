@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import {
   addRecordingToCollection,
   removeRecordingFromCollection,
+  deleteRecording as dbDeleteRecording,
   deleteCollection as dbDeleteCollection,
   renameCollection as dbRenameCollection,
   fetchCollections,
@@ -51,6 +52,7 @@ interface AppState {
     isMember: boolean,
   ) => Promise<void>;
 
+  removeRecording: (id: number) => Promise<void>;
   importRecordings: (filePaths: string[]) => Promise<void>;
   addRecordingsToCollection: (
     recordingIds: number[],
@@ -172,6 +174,18 @@ export const useStore = create<AppState>((set, get) => ({
     if (get().selectedCollectionId === id) set({ selectedCollectionId: null });
     await dbDeleteCollection(id);
     await get().loadAll();
+  },
+
+  removeRecording: async (id) => {
+    await dbDeleteRecording(id);
+    const { selectedRecordingId, peaksMap } = get();
+    const nextPeaksMap = new Map(peaksMap);
+    nextPeaksMap.delete(id);
+    set({
+      recordings: get().recordings.filter((r) => r.id !== id),
+      peaksMap: nextPeaksMap,
+      selectedRecordingId: selectedRecordingId === id ? null : selectedRecordingId,
+    });
   },
 
   toggleCollectionMembership: async (recordingId, collectionId, isMember) => {

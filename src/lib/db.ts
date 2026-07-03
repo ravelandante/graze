@@ -197,6 +197,11 @@ export async function savePeaks(id: number, peaks: number[][]): Promise<void> {
   ]);
 }
 
+export async function deleteRecording(id: number): Promise<void> {
+  const d = await getDb();
+  await d.execute("DELETE FROM recordings WHERE id = ?", [id]);
+}
+
 export async function removeRecordingFromCollection(
   recordingId: number,
   collectionId: number,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Trash2 } from "lucide-react";
 import { useStore } from "../store";
 
 interface Props {
@@ -20,10 +20,11 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
   const toggleCollectionMembership = useStore(
     (s) => s.toggleCollectionMembership,
   );
+  const removeRecording = useStore((s) => s.removeRecording);
 
   const [showCollections, setShowCollections] = useState(false);
 
-  const rootHeight = ITEM_HEIGHT + 8; // one item + padding
+  const rootHeight = ITEM_HEIGHT * 2 + 8 + 1; // items + padding + separator
   const collectionHeight = showCollections
     ? (collections.length || 1) * ITEM_HEIGHT + ITEM_HEIGHT + 8 // items + back row + padding
     : rootHeight;
@@ -60,20 +61,34 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
         style={{ left, top, minWidth: MENU_WIDTH }}
       >
         {!showCollections ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowCollections(true);
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
-          >
-            <span>Edit collection</span>
-            <ChevronRight
-              size={12}
-              strokeWidth={1.5}
-              className="shrink-0 text-zinc-500"
-            />
-          </button>
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCollections(true);
+              }}
+              className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+            >
+              <span>Edit collection</span>
+              <ChevronRight
+                size={12}
+                strokeWidth={1.5}
+                className="shrink-0 text-zinc-500"
+              />
+            </button>
+            <div className="border-t border-zinc-700 mx-1 my-1" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeRecording(recordingId);
+                onClose();
+              }}
+              className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-zinc-700 flex items-center justify-between gap-3"
+            >
+              <span>Remove from library</span>
+              <Trash2 size={12} strokeWidth={1.5} className="shrink-0" />
+            </button>
+          </>
         ) : (
           <>
             <button
