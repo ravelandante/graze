@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { AudioWaveform, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import {
+  AudioWaveform,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Minus,
+  Equal,
+} from "lucide-react";
 import { loadSetting, saveSetting } from "../lib/settings";
 import { Waveform } from "./Waveform";
 import { Spectrogram } from "./Spectrogram";
@@ -54,11 +61,13 @@ export function Playbar({
   const [playbarMode, setPlaybarMode] = useState<"waveform" | "spectrogram">(
     () => loadSetting("playbarMode", "waveform"),
   );
+  const [stereo, setStereo] = useState(true);
+  const isStereo = (recording?.channels ?? 1) > 1;
   const [waveformHeight, setWaveformHeight] = useState(() =>
     loadSetting("waveformHeight", 128),
   );
   const [maxWaveformHeight] = useState(() =>
-    Math.floor(window.innerHeight / 3),
+    Math.floor(window.innerHeight / 2),
   );
   const [isHeightDragging, setIsHeightDragging] = useState(false);
 
@@ -138,6 +147,27 @@ export function Playbar({
         <button
           onClick={(e) => {
             e.stopPropagation();
+            setStereo((v) => !v);
+          }}
+          disabled={!isStereo}
+          className={`bg-zinc-900 border border-b-0 border-zinc-800 rounded-t px-2 py-0.5 flex items-center disabled:opacity-30 disabled:cursor-not-allowed ${stereo && isStereo ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
+          title={
+            !isStereo
+              ? "Mono recording"
+              : stereo
+                ? "Switch to mono"
+                : "Switch to stereo"
+          }
+        >
+          {stereo && isStereo ? (
+            <Equal size={12} strokeWidth={1.5} />
+          ) : (
+            <Minus size={12} strokeWidth={1.5} />
+          )}
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
             const next =
               playbarMode === "waveform" ? "spectrogram" : "waveform";
             setPlaybarMode(next);
@@ -197,6 +227,7 @@ export function Playbar({
               duration={recording.durationSeconds ?? undefined}
               audioEl={audioEl}
               onReady={handleWsReady}
+              channelCount={stereo && isStereo ? (recording.channels ?? 1) : 1}
             />
           ) : recording && playbarMode === "spectrogram" ? (
             <Spectrogram
