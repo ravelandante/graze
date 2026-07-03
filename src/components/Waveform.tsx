@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
@@ -23,6 +23,7 @@ export function Waveform({
   const wsRef = useRef<WaveSurfer | null>(null);
   const audioElRef = useRef(audioEl);
   const onReadyRef = useRef(onReady);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     audioElRef.current = audioEl;
   }, [audioEl]);
@@ -33,6 +34,7 @@ export function Waveform({
   useEffect(() => {
     if (!containerRef.current) return;
     wsRef.current?.destroy();
+    setLoading(true);
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
@@ -50,6 +52,7 @@ export function Waveform({
     let onTimeUpdate: (() => void) | null = null;
 
     ws.on("ready", () => {
+      setLoading(false);
       const el = audioElRef.current;
       if (el) {
         onTimeUpdate = () => {
@@ -74,5 +77,12 @@ export function Waveform({
     };
   }, [filePath, height, peaks, duration]);
 
-  return <div ref={containerRef} className="w-full" />;
+  return (
+    <div className="relative w-full" style={{ height }}>
+      {loading && (
+        <div className="absolute inset-0 animate-pulse rounded bg-zinc-800" />
+      )}
+      <div ref={containerRef} className="w-full" />
+    </div>
+  );
 }

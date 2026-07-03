@@ -13,6 +13,7 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
   const waveformRef = useRef<HTMLDivElement>(null);
   const spectrogramRef = useRef<HTMLDivElement>(null);
   const audioElRef = useRef(audioEl);
+  const [loading, setLoading] = useState(true);
   const [cursorPct, setCursorPct] = useState(() =>
     audioEl.duration ? (audioEl.currentTime / audioEl.duration) * 100 : 0,
   );
@@ -33,6 +34,7 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
 
   useEffect(() => {
     if (!waveformRef.current || !spectrogramRef.current) return;
+    setLoading(true);
 
     const ws = WaveSurfer.create({
       container: waveformRef.current,
@@ -54,6 +56,7 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
     );
 
     ws.on("ready", () => {
+      setLoading(false);
       const el = audioElRef.current;
       if (el?.duration) ws.seekTo(el.currentTime / el.duration);
     });
@@ -72,6 +75,9 @@ export function Spectrogram({ filePath, height, audioEl }: Props) {
 
   return (
     <div className="relative w-full" style={{ height }}>
+      {loading && (
+        <div className="absolute inset-0 animate-pulse rounded bg-zinc-800" />
+      )}
       <div
         ref={waveformRef}
         style={{
