@@ -54,7 +54,7 @@ const columns = [
   }),
   col.display({
     id: "timeRef",
-    header: "TimeRef",
+    header: "Time Reference",
     size: 120,
     minSize: 60,
     cell: (info) => (
@@ -62,6 +62,7 @@ const columns = [
         {formatTimeReference(
           info.row.original.timeReference,
           info.row.original.sampleRate,
+          info.row.original.recordedAt,
         )}
       </span>
     ),

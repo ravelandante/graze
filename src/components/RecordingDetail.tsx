@@ -118,6 +118,7 @@ export function RecordingDetail() {
               value={formatTimeReference(
                 recording.timeReference,
                 recording.sampleRate,
+                recording.recordedAt,
               )}
             />
             <MetaRow label="Description" value={recording.bwfDescription} />
