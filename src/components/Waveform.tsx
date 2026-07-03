@@ -5,12 +5,13 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 interface Props {
   filePath: string;
   height?: number;
-  /** When provided, WaveSurfer cursor tracks this element's playback position and seek clicks update it. */
+  peaks?: number[][];
+  duration?: number;
   audioEl?: HTMLAudioElement;
   onReady?: (ws: WaveSurfer) => void;
 }
 
-export function Waveform({ filePath, height = 64, audioEl, onReady }: Props) {
+export function Waveform({ filePath, height = 64, peaks, duration, audioEl, onReady }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const audioElRef = useRef(audioEl);
@@ -36,6 +37,7 @@ export function Waveform({ filePath, height = 64, audioEl, onReady }: Props) {
       height,
       normalize: true,
       url: convertFileSrc(filePath),
+      ...(peaks && duration != null ? { peaks, duration } : {}),
     });
 
     let onTimeUpdate: (() => void) | null = null;
@@ -63,7 +65,7 @@ export function Waveform({ filePath, height = 64, audioEl, onReady }: Props) {
         audioElRef.current?.removeEventListener("timeupdate", onTimeUpdate);
       ws.destroy();
     };
-  }, [filePath, height]);
+  }, [filePath, height, peaks, duration]);
 
   return <div ref={containerRef} className="w-full" />;
 }

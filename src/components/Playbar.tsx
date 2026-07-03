@@ -43,6 +43,9 @@ export function Playbar({
   const recording = useStore(
     (s) => s.recordings.find((r) => r.id === s.selectedRecordingId) ?? null,
   );
+  const peaks = useStore((s) =>
+    s.selectedRecordingId != null ? (s.peaksMap.get(s.selectedRecordingId) ?? undefined) : undefined,
+  );
   const normalizeRecording = useStore((s) => s.normalizeRecording);
   const trimRecording = useStore((s) => s.trimRecording);
   const [expanded, setExpanded] = useState(false);
@@ -181,6 +184,8 @@ export function Playbar({
               key={recording.filePath}
               filePath={recording.filePath}
               height={maxWaveformHeight}
+              peaks={peaks}
+              duration={recording.durationSeconds ?? undefined}
               audioEl={audioEl}
               onReady={handleWsReady}
             />
