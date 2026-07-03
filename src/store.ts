@@ -190,7 +190,9 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   importRecordings: async (filePaths) => {
-    set({ status: `Importing ${filePaths.length} file(s)…` });
+    set({
+      status: `Importing ${filePaths.length} file${filePaths.length !== 1 ? "s" : ""}…`,
+    });
     for (const filePath of filePaths) {
       try {
         const meta = await extractMetadata(filePath);
@@ -201,6 +203,10 @@ export const useStore = create<AppState>((set, get) => ({
     }
     set({ status: null });
     await get().loadAll();
+    const imported = get().recordings.filter((r) =>
+      filePaths.includes(r.filePath),
+    );
+    get().startPeakComputation(imported);
   },
 
   saveRecording: async (updates) => {
