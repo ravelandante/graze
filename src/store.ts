@@ -47,12 +47,12 @@ interface AppState {
   renameCollection: (id: number, name: string) => Promise<void>;
   deleteCollection: (id: number) => Promise<void>;
   toggleCollectionMembership: (
-    recordingId: number,
+    recordingIds: number[],
     collectionId: number,
     isMember: boolean,
   ) => Promise<void>;
 
-  removeRecording: (id: number) => Promise<void>;
+  removeRecording: (ids: number[]) => Promise<void>;
   importRecordings: (filePaths: string[]) => Promise<void>;
   addRecordingsToCollection: (
     recordingIds: number[],
@@ -176,23 +176,27 @@ export const useStore = create<AppState>((set, get) => ({
     await get().loadAll();
   },
 
-  removeRecording: async (id) => {
-    await dbDeleteRecording(id);
-    const { selectedRecordingId, peaksMap } = get();
+  removeRecording: async (ids) => {
+    for (const id of ids) await dbDeleteRecording(id);
+    const { selectedRecordingId, peaksMap, selectedIds } = get();
+    const idSet = new Set(ids);
     const nextPeaksMap = new Map(peaksMap);
-    nextPeaksMap.delete(id);
+    for (const id of ids) nextPeaksMap.delete(id);
     set({
-      recordings: get().recordings.filter((r) => r.id !== id),
+      recordings: get().recordings.filter((r) => !idSet.has(r.id)),
       peaksMap: nextPeaksMap,
-      selectedRecordingId: selectedRecordingId === id ? null : selectedRecordingId,
+      selectedRecordingId: idSet.has(selectedRecordingId!) ? null : selectedRecordingId,
+      selectedIds: new Set([...selectedIds].filter((id) => !idSet.has(id))),
     });
   },
 
-  toggleCollectionMembership: async (recordingId, collectionId, isMember) => {
-    if (isMember) {
-      await removeRecordingFromCollection(recordingId, collectionId);
-    } else {
-      await addRecordingToCollection(recordingId, collectionId);
+  toggleCollectionMembership: async (recordingIds, collectionId, isMember) => {
+    for (const recordingId of recordingIds) {
+      if (isMember) {
+        await removeRecordingFromCollection(recordingId, collectionId);
+      } else {
+        await addRecordingToCollection(recordingId, collectionId);
+      }
     }
     await get().loadAll();
   },

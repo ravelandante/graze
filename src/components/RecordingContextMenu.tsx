@@ -21,6 +21,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
     (s) => s.toggleCollectionMembership,
   );
   const removeRecording = useStore((s) => s.removeRecording);
+  const selectedIds = [...useStore((s) => s.selectedIds)];
 
   const [showCollections, setShowCollections] = useState(false);
 
@@ -80,7 +81,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                removeRecording(recordingId);
+                removeRecording(selectedIds);
                 onClose();
               }}
               className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-zinc-700 flex items-center justify-between gap-3"
@@ -112,7 +113,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
                   <button
                     key={c.id}
                     onClick={() => {
-                      toggleCollectionMembership(recordingId, c.id, isMember);
+                      toggleCollectionMembership(selectedIds, c.id, isMember);
                       onClose();
                     }}
                     className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"

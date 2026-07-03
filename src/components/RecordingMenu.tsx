@@ -88,7 +88,7 @@ export function RecordingMenu({ recordingId }: Props) {
                     key={c.id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleCollectionMembership(recordingId, c.id, isMember);
+                      toggleCollectionMembership([recordingId], c.id, isMember);
                       setOpen(false);
                       setShowCollections(false);
                     }}
