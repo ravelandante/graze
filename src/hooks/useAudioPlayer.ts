@@ -55,7 +55,7 @@ export function useAudioPlayer(recordings: Recording[]) {
       audio.pause();
       audio.src = "";
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [audio]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedId) {
@@ -74,7 +74,7 @@ export function useAudioPlayer(recordings: Recording[]) {
     } else {
       setIsPlaying(false);
     }
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [audio, selectedId]);
 
   const togglePlay = useCallback(() => {
     if (audio.paused) {
