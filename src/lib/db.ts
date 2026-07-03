@@ -11,6 +11,13 @@ async function getDb(): Promise<Database> {
 }
 
 async function migrate(db: Database) {
+  const cols = await db.select<{ name: string }[]>(
+    "PRAGMA table_info(recordings)",
+  );
+  if (!cols.some((c) => c.name === "peaks")) {
+    await db.execute("ALTER TABLE recordings ADD COLUMN peaks TEXT");
+  }
+
   await db.execute(`
     CREATE TABLE IF NOT EXISTS recordings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
