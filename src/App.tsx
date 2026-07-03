@@ -90,9 +90,11 @@ export default function App() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                isDetailCollapsed
-                  ? detailPanelRef.current?.expand()
-                  : detailPanelRef.current?.collapse();
+                if (isDetailCollapsed) {
+                  detailPanelRef.current?.expand();
+                } else {
+                  detailPanelRef.current?.collapse();
+                }
               }}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-4 h-6 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700 cursor-pointer"
               title={

@@ -77,13 +77,13 @@ export function useAudioPlayer(recordings: Recording[]) {
       audio.pause();
       setIsPlaying(false);
     }
-  }, []);
+  }, [audio]);
 
   const stop = useCallback(() => {
     audio.pause();
     audio.currentTime = 0;
     setIsPlaying(false);
-  }, []);
+  }, [audio]);
 
   const playNext = useCallback(() => {
     const recs = recordingsRef.current;
@@ -99,7 +99,7 @@ export function useAudioPlayer(recordings: Recording[]) {
       saveSetting("isLooping", next);
       return next;
     });
-  }, []);
+  }, [audio]);
 
   const toggleAutoAdvance = useCallback(() => {
     setIsAutoAdvance((prev) => {

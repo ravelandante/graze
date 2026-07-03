@@ -179,7 +179,9 @@ export async function getExistingPeaks(): Promise<Map<number, number[][]>> {
   for (const { id, peaks } of rows) {
     try {
       map.set(id, JSON.parse(peaks));
-    } catch {}
+    } catch {
+      // skip rows with malformed peaks JSON
+    }
   }
   return map;
 }

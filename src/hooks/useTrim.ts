@@ -25,7 +25,7 @@ export function useTrim(
     } else {
       updateRegion();
     }
-  }, [expanded]);
+  }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     trimInRef.current = null;
