@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { invoke } from "@tauri-apps/api/core";
 import {
   addRecordingToCollection,
   removeRecordingFromCollection,
@@ -6,9 +7,11 @@ import {
   renameCollection as dbRenameCollection,
   fetchCollections,
   fetchMemberships,
+  getExistingPeaks,
   fetchRecordings,
   insertCollection,
   insertRecording,
+  savePeaks,
   updateRecording,
 } from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
@@ -22,6 +25,8 @@ interface AppState {
   memberships: Map<number, Set<number>>;
   // recordingId → Set<collectionId> (inverse of memberships, computed on load)
   recordingMemberships: Map<number, Set<number>>;
+  // recordingId → peaks (one float array per channel)
+  peaksMap: Map<number, number[][]>;
 
   selectedRecordingId: number | null;
   selectedIds: Set<number>;
@@ -30,6 +35,7 @@ interface AppState {
   status: string | null;
 
   loadAll: () => Promise<void>;
+  startPeakComputation: (targets?: Recording[]) => void;
   setSelectedRecordingId: (id: number | null) => void;
   setSelectedIds: (ids: Set<number>) => void;
   setSelectedCollectionId: (id: number | null) => void;
@@ -70,6 +76,7 @@ export const useStore = create<AppState>((set, get) => ({
   collections: [],
   memberships: new Map(),
   recordingMemberships: new Map(),
+  peaksMap: new Map(),
   selectedRecordingId: null,
   selectedIds: new Set<number>(),
   selectedCollectionId: null,
@@ -77,12 +84,60 @@ export const useStore = create<AppState>((set, get) => ({
   status: null,
 
   loadAll: async () => {
-    const [recordings, collections, memberships] = await Promise.all([
+    const [recordings, collections, memberships, peaksMap] = await Promise.all([
       fetchRecordings(),
       fetchCollections(),
       fetchMemberships(),
+      getExistingPeaks(),
     ]);
-    set({ recordings, collections, memberships, recordingMemberships: invertMemberships(memberships) });
+    set({
+      recordings,
+      collections,
+      memberships,
+      recordingMemberships: invertMemberships(memberships),
+      peaksMap,
+    });
+  },
+
+  startPeakComputation: (targets?: Recording[]) => {
+    const { recordings, peaksMap } = get();
+    const missing = targets ?? recordings.filter((r) => !peaksMap.has(r.id));
+    if (missing.length === 0) return;
+
+    const CONCURRENCY = 2;
+    let inFlight = 0;
+    let index = 0;
+
+    function processNext() {
+      while (inFlight < CONCURRENCY && index < missing.length) {
+        const recordingToCompute = missing[index++];
+        inFlight++;
+        invoke<number[][]>("compute_peaks", {
+          filePath: recordingToCompute.filePath,
+        })
+          .then(async (peaks) => {
+            await savePeaks(recordingToCompute.id, peaks);
+            set((state) => ({
+              peaksMap: new Map(state.peaksMap).set(
+                recordingToCompute.id,
+                peaks,
+              ),
+            }));
+          })
+          .catch((err) =>
+            console.warn(
+              `Peak computation failed for ${recordingToCompute.fileName}:`,
+              err,
+            ),
+          )
+          .finally(() => {
+            inFlight--;
+            processNext();
+          });
+      }
+    }
+
+    processNext();
   },
 
   setSelectedRecordingId: (id) => {
