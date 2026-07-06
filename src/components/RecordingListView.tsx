@@ -49,12 +49,17 @@ export function RecordingListView({ recordings }: Props) {
               {...getDragProps(r.id)}
               className={`w-full text-left px-4 py-3 border-b border-zinc-800 ${
                 selectedIds.has(r.id) ? "bg-zinc-700" : "hover:bg-zinc-800"
-              }`}
+              } ${r.status === "missing" ? "opacity-50" : ""}`}
             >
               <p
                 className={`text-sm font-medium truncate ${r.title ? "text-white" : "text-zinc-400"}`}
               >
                 {r.title ?? "No title"}
+                {r.status === "missing" && (
+                  <span className="ml-2 text-xs font-normal text-amber-500">
+                    Missing
+                  </span>
+                )}
               </p>
               <p className="text-xs text-zinc-500 mt-0.5 truncate">
                 {r.fileName}

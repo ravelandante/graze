@@ -31,9 +31,13 @@ const columns = [
     minSize: 80,
     cell: (info) => {
       const value = info.getValue();
+      const isMissing = info.row.original.status === "missing";
       return (
         <p className={`truncate ${value ? "text-white" : "text-zinc-500"}`}>
           {value ?? "No title"}
+          {isMissing && (
+            <span className="ml-2 text-amber-500 font-normal">Missing</span>
+          )}
         </p>
       );
     },
@@ -254,7 +258,7 @@ export function RecordingTableView({
                 selectedIds.has(row.original.id)
                   ? "bg-zinc-700"
                   : "hover:bg-zinc-800"
-              }`}
+              } ${row.original.status === "missing" ? "opacity-50" : ""}`}
             >
               {row.getVisibleCells().map((cell) => (
                 <td

@@ -43,6 +43,11 @@ export function RecordingDetail() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {recording.status === "missing" && (
+        <div className="px-4 py-2.5 bg-amber-950/50 border-b border-amber-900/50 text-amber-400 text-xs">
+          File not found — it may have been moved or deleted.
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
