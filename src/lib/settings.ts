@@ -2,7 +2,6 @@ type SettingMap = {
   isAutoplay: boolean;
   isAutoAdvance: boolean;
   isLooping: boolean;
-  viewMode: "list" | "table";
   waveformHeight: number;
   tableColumnVisibility: Record<string, boolean>;
   playbarMode: "waveform" | "spectrogram";

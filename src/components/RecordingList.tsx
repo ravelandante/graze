@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { LayoutList, Table2 } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
 import { ImportMenu } from "./ImportMenu";
 import type { Recording } from "../types";
-import { RecordingListView } from "./RecordingListView";
 import { RecordingTableView } from "./RecordingTableView";
 import { loadSetting, saveSetting } from "../lib/settings";
 import { useStore } from "../store";
@@ -29,17 +27,9 @@ export function RecordingList({ visibleRecordings }: Props) {
   const addWatchedFolder = useStore((s) => s.addWatchedFolder);
   const setStatus = useStore((s) => s.setStatus);
 
-  const [view, setView] = useState<"list" | "table">(() =>
-    loadSetting("viewMode", "list"),
-  );
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(() => loadSetting("tableColumnVisibility", {}));
-
-  function handleSetView(next: "list" | "table") {
-    setView(next);
-    saveSetting("viewMode", next);
-  }
 
   function handleColumnVisibilityChange(next: Record<string, boolean>) {
     setColumnVisibility(next);
@@ -94,43 +84,20 @@ export function RecordingList({ visibleRecordings }: Props) {
           onWatchFolder={handleWatchFolder}
         />
       </div>
-
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
-        <button
-          onClick={() => handleSetView("list")}
-          className={`p-1 rounded ${view === "list" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
-          title="List view"
-        >
-          <LayoutList size={14} strokeWidth={1.5} />
-        </button>
-        <button
-          onClick={() => handleSetView("table")}
-          className={`p-1 rounded ${view === "table" ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
-          title="Table view"
-        >
-          <Table2 size={14} strokeWidth={1.5} />
-        </button>
-
-        {view === "table" && (
-          <div className="ml-auto">
-            <ColumnVisibilityMenu
-              columns={TABLE_COLUMNS}
-              visibility={columnVisibility}
-              onChange={handleColumnVisibilityChange}
-            />
-          </div>
-        )}
+        <div className="ml-auto">
+          <ColumnVisibilityMenu
+            columns={TABLE_COLUMNS}
+            visibility={columnVisibility}
+            onChange={handleColumnVisibilityChange}
+          />
+        </div>
       </div>
-
-      {view === "list" ? (
-        <RecordingListView recordings={visibleRecordings} />
-      ) : (
-        <RecordingTableView
-          recordings={visibleRecordings}
-          columnVisibility={columnVisibility}
-          onColumnVisibilityChange={handleColumnVisibilityChange}
-        />
-      )}
+      <RecordingTableView
+        recordings={visibleRecordings}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={handleColumnVisibilityChange}
+      />
     </div>
   );
 }
