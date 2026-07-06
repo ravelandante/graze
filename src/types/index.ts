@@ -1,3 +1,5 @@
+export type RecordingStatus = "present" | "missing";
+
 export interface Recording {
   id: number;
   filePath: string;
@@ -19,6 +21,7 @@ export interface Recording {
   format: string | null; // 'wav' | 'mp3'
   fileSizeBytes: number | null;
   importedAt: string;
+  status: RecordingStatus;
 }
 
 export interface Collection {
