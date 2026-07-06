@@ -1,4 +1,6 @@
 mod metadata;
+mod scan;
+mod watcher;
 pub use metadata::RecordingMeta;
 
 use symphonia::core::audio::SampleBuffer;
@@ -137,7 +139,9 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             compute_peaks,
-            metadata::extract_metadata
+            metadata::extract_metadata,
+            scan::scan_folder,
+            scan::paths_exist,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
