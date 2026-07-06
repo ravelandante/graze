@@ -67,10 +67,14 @@ export function useAudioPlayer(recordings: Recording[]) {
     if (!recording) return;
     audio.src = convertFileSrc(recording.filePath);
     if (isAutoplayRef.current) {
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+      void (async () => {
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch {
+          setIsPlaying(false);
+        }
+      })();
     } else {
       setIsPlaying(false);
     }
@@ -78,7 +82,10 @@ export function useAudioPlayer(recordings: Recording[]) {
 
   const togglePlay = useCallback(() => {
     if (audio.paused) {
-      audio.play().then(() => setIsPlaying(true));
+      void (async () => {
+        await audio.play();
+        setIsPlaying(true);
+      })();
     } else {
       audio.pause();
       setIsPlaying(false);

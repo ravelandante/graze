@@ -130,10 +130,11 @@ export const useStore = create<AppState>((set, get) => ({
       while (inFlight < CONCURRENCY && index < pending.length) {
         const recordingToCompute = pending[index++];
         inFlight++;
-        invoke<number[][]>("compute_peaks", {
-          filePath: recordingToCompute.filePath,
-        })
-          .then(async (peaks) => {
+        void (async () => {
+          try {
+            const peaks = await invoke<number[][]>("compute_peaks", {
+              filePath: recordingToCompute.filePath,
+            });
             await savePeaks(recordingToCompute.id, peaks);
             set((state) => ({
               peaksMap: new Map(state.peaksMap).set(
@@ -141,17 +142,16 @@ export const useStore = create<AppState>((set, get) => ({
                 peaks,
               ),
             }));
-          })
-          .catch((err) =>
+          } catch (err) {
             console.warn(
               `Peak computation failed for ${recordingToCompute.fileName}:`,
               err,
-            ),
-          )
-          .finally(() => {
+            );
+          } finally {
             inFlight--;
             processNext();
-          });
+          }
+        })();
       }
     }
 

@@ -29,12 +29,15 @@ export default function App() {
 
   useEffect(() => {
     let unlisten: (() => void) | null = null;
-    registerWatcherListeners(handleFilesAdded, handleFilesRemoved)
-      .then((fn) => {
-        unlisten = fn;
-        return loadAll();
-      })
-      .then(reconcileLibrary);
+    async function setup() {
+      unlisten = await registerWatcherListeners(
+        handleFilesAdded,
+        handleFilesRemoved,
+      );
+      await loadAll();
+      await reconcileLibrary();
+    }
+    void setup();
     return () => {
       unlisten?.();
     };
