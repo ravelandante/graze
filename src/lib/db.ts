@@ -1,5 +1,5 @@
 import Database from "@tauri-apps/plugin-sql";
-import type { Collection, Recording } from "../types";
+import type { Collection, Recording, RecordingStatus } from "../types";
 
 let db: Database | null = null;
 
@@ -16,6 +16,16 @@ async function migrate(db: Database) {
   );
   if (!cols.some((c) => c.name === "peaks")) {
     await db.execute("ALTER TABLE recordings ADD COLUMN peaks TEXT");
+  }
+  if (!cols.some((c) => c.name === "status")) {
+    await db.execute(
+      "ALTER TABLE recordings ADD COLUMN status TEXT NOT NULL DEFAULT 'present'",
+    );
+    if (cols.some((c) => c.name === "missing")) {
+      await db.execute(
+        "UPDATE recordings SET status = 'missing' WHERE missing = 1",
+      );
+    }
   }
 
   await db.execute(`
@@ -37,6 +47,7 @@ async function migrate(db: Database) {
       channels INTEGER,
       format TEXT,
       file_size_bytes INTEGER,
+      status TEXT NOT NULL DEFAULT 'present',
       imported_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
@@ -68,7 +79,7 @@ export async function fetchRecordings(): Promise<Recording[]> {
   const d = await getDb();
   return d.select<Recording[]>(`
     SELECT
-      id, title, artist, comment, originator, channels, format,
+      id, title, artist, comment, originator, channels, format, status,
       file_path             as filePath,
       file_name             as fileName,
       originator_reference  as originatorReference,
@@ -84,7 +95,7 @@ export async function fetchRecordings(): Promise<Recording[]> {
   `);
 }
 
-export type RecordingInsert = Omit<Recording, "id" | "importedAt">;
+export type RecordingInsert = Omit<Recording, "id" | "importedAt" | "status">;
 
 export async function insertRecording(r: RecordingInsert): Promise<void> {
   const d = await getDb();
@@ -210,5 +221,31 @@ export async function removeRecordingFromCollection(
   await d.execute(
     "DELETE FROM recording_collections WHERE recording_id = ? AND collection_id = ?",
     [recordingId, collectionId],
+  );
+}
+
+export async function setRecordingsStatus(
+  ids: number[],
+  status: RecordingStatus,
+): Promise<void> {
+  if (ids.length === 0) return;
+  const d = await getDb();
+  const placeholders = ids.map(() => "?").join(",");
+  await d.execute(
+    `UPDATE recordings SET status = ? WHERE id IN (${placeholders})`,
+    [status, ...ids],
+  );
+}
+
+export async function setRecordingsStatusByPath(
+  paths: string[],
+  status: RecordingStatus,
+): Promise<void> {
+  if (paths.length === 0) return;
+  const d = await getDb();
+  const placeholders = paths.map(() => "?").join(",");
+  await d.execute(
+    `UPDATE recordings SET status = ? WHERE file_path IN (${placeholders})`,
+    [status, ...paths],
   );
 }
