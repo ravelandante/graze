@@ -4,9 +4,10 @@ import { ChevronDown } from "lucide-react";
 interface Props {
   onImport: () => void;
   onImportFolder: () => void;
+  onWatchFolder: () => void;
 }
 
-export function ImportMenu({ onImport, onImportFolder }: Props) {
+export function ImportMenu({ onImport, onImportFolder, onWatchFolder }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,6 +40,15 @@ export function ImportMenu({ onImport, onImportFolder }: Props) {
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Import folder
+            </button>
+            <button
+              onClick={() => {
+                setOpen(false);
+                onWatchFolder();
+              }}
+              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+            >
+              Watch folder
             </button>
           </div>
         </>

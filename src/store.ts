@@ -22,6 +22,7 @@ import type { Collection, Recording } from "./types";
 interface AppState {
   recordings: Recording[];
   collections: Collection[];
+  watchedFolders: string[];
   // collectionId → Set<recordingId>
   memberships: Map<number, Set<number>>;
   // recordingId → Set<collectionId> (inverse of memberships, computed on load)
@@ -37,6 +38,7 @@ interface AppState {
 
   loadAll: () => Promise<void>;
   startPeakComputation: (targets?: Recording[]) => void;
+  addWatchedFolder: (path: string) => Promise<void>;
   setSelectedRecordingId: (id: number | null) => void;
   setSelectedIds: (ids: Set<number>) => void;
   setSelectedCollectionId: (id: number | null) => void;
@@ -79,6 +81,7 @@ function invertMemberships(
 export const useStore = create<AppState>((set, get) => ({
   recordings: [],
   collections: [],
+  watchedFolders: [],
   memberships: new Map(),
   recordingMemberships: new Map(),
   peaksMap: new Map(),
@@ -159,6 +162,23 @@ export const useStore = create<AppState>((set, get) => ({
   setSelectedCollectionId: (id) => set({ selectedCollectionId: id }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStatus: (s) => set({ status: s }),
+
+
+  addWatchedFolder: async (path) => {
+    await insertWatchedFolder(path);
+    const metas = await invoke<RecordingInsert[]>("scan_folder", { path });
+    for (const meta of metas) {
+      await insertRecording(meta);
+    }
+    await invoke("watch_paths", { paths: [path] });
+    await get().loadAll();
+    set({ watchedFolders: [...get().watchedFolders, path] });
+    const recordings = get().recordings;
+    const newOnes = recordings.filter((r) =>
+      metas.some((m) => m.filePath === r.filePath),
+    );
+    get().startPeakComputation(newOnes);
+  },
 
   createCollection: async (name) => {
     await insertCollection(name);

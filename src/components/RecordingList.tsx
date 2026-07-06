@@ -26,6 +26,7 @@ export function RecordingList({ visibleRecordings }: Props) {
   const searchQuery = useStore((s) => s.searchQuery);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
   const importRecordings = useStore((s) => s.importRecordings);
+  const addWatchedFolder = useStore((s) => s.addWatchedFolder);
   const setStatus = useStore((s) => s.setStatus);
 
   const [view, setView] = useState<"list" | "table">(() =>
@@ -71,6 +72,12 @@ export function RecordingList({ visibleRecordings }: Props) {
     await importRecordings(filePaths);
   }
 
+  async function handleWatchFolder() {
+    const folder = await open({ directory: true });
+    if (!folder || typeof folder !== "string") return;
+    await addWatchedFolder(folder);
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
       <div className="px-3 py-2 border-b border-zinc-800 flex gap-2">
@@ -84,6 +91,7 @@ export function RecordingList({ visibleRecordings }: Props) {
         <ImportMenu
           onImport={handleImport}
           onImportFolder={handleImportFolder}
+          onWatchFolder={handleWatchFolder}
         />
       </div>
 
