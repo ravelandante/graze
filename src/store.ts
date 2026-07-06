@@ -8,12 +8,17 @@ import {
   renameCollection as dbRenameCollection,
   fetchCollections,
   fetchMemberships,
+  fetchWatchedFolders,
+  insertWatchedFolder,
   getExistingPeaks,
   fetchRecordings,
   insertCollection,
   insertRecording,
   savePeaks,
+  setRecordingsStatus,
+  setRecordingsStatusByPath,
   updateRecording,
+  type RecordingInsert,
 } from "./lib/db";
 import { extractMetadata } from "./lib/metadata";
 import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
@@ -38,7 +43,10 @@ interface AppState {
 
   loadAll: () => Promise<void>;
   startPeakComputation: (targets?: Recording[]) => void;
+  reconcileLibrary: () => Promise<void>;
   addWatchedFolder: (path: string) => Promise<void>;
+  handleFilesAdded: (metas: RecordingInsert[]) => void;
+  handleFilesRemoved: (paths: string[]) => void;
   setSelectedRecordingId: (id: number | null) => void;
   setSelectedIds: (ids: Set<number>) => void;
   setSelectedCollectionId: (id: number | null) => void;
@@ -109,16 +117,18 @@ export const useStore = create<AppState>((set, get) => ({
 
   startPeakComputation: (targets?: Recording[]) => {
     const { recordings, peaksMap } = get();
-    const missing = targets ?? recordings.filter((r) => !peaksMap.has(r.id));
-    if (missing.length === 0) return;
+    const pending = targets
+      ? targets.filter((r) => r.status !== "missing")
+      : recordings.filter((r) => r.status !== "missing" && !peaksMap.has(r.id));
+    if (pending.length === 0) return;
 
     const CONCURRENCY = 2;
     let inFlight = 0;
     let index = 0;
 
     function processNext() {
-      while (inFlight < CONCURRENCY && index < missing.length) {
-        const recordingToCompute = missing[index++];
+      while (inFlight < CONCURRENCY && index < pending.length) {
+        const recordingToCompute = pending[index++];
         inFlight++;
         invoke<number[][]>("compute_peaks", {
           filePath: recordingToCompute.filePath,
@@ -150,7 +160,6 @@ export const useStore = create<AppState>((set, get) => ({
 
   setSelectedRecordingId: (id) => {
     const { selectedIds } = get();
-    // keep selectedIds in sync when not in a multi-selection
     set({
       selectedRecordingId: id,
       ...(selectedIds.size <= 1
@@ -163,6 +172,54 @@ export const useStore = create<AppState>((set, get) => ({
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStatus: (s) => set({ status: s }),
 
+  reconcileLibrary: async () => {
+    const folders = await fetchWatchedFolders();
+    set({ watchedFolders: folders });
+
+    if (folders.length > 0) {
+      await invoke("watch_paths", { paths: folders });
+    }
+
+    const scanResults = await Promise.all(
+      folders.map((f) => invoke<RecordingInsert[]>("scan_folder", { path: f })),
+    );
+    for (const metas of scanResults) {
+      for (const meta of metas) {
+        await insertRecording(meta);
+      }
+    }
+
+    await get().loadAll();
+    const recordings = get().recordings;
+    if (recordings.length === 0) return;
+
+    const presence = await invoke<boolean[]>("paths_exist", {
+      paths: recordings.map((r) => r.filePath),
+    });
+
+    const nowMissingIds: number[] = [];
+    const nowPresentIds: number[] = [];
+    recordings.forEach((r, i) => {
+      if (!presence[i] && r.status !== "missing") nowMissingIds.push(r.id);
+      if (presence[i] && r.status === "missing") nowPresentIds.push(r.id);
+    });
+
+    await setRecordingsStatus(nowMissingIds, "missing");
+    await setRecordingsStatus(nowPresentIds, "present");
+
+    if (nowMissingIds.length > 0 || nowPresentIds.length > 0) {
+      const changed = new Map<number, "present" | "missing">();
+      nowMissingIds.forEach((id) => changed.set(id, "missing"));
+      nowPresentIds.forEach((id) => changed.set(id, "present"));
+      set({
+        recordings: get().recordings.map((r) =>
+          changed.has(r.id) ? { ...r, status: changed.get(r.id)! } : r,
+        ),
+      });
+    }
+
+    get().startPeakComputation();
+  },
 
   addWatchedFolder: async (path) => {
     await insertWatchedFolder(path);
@@ -178,6 +235,35 @@ export const useStore = create<AppState>((set, get) => ({
       metas.some((m) => m.filePath === r.filePath),
     );
     get().startPeakComputation(newOnes);
+  },
+
+  handleFilesAdded: (metas) => {
+    void (async () => {
+      for (const meta of metas) {
+        await insertRecording(meta);
+      }
+      await setRecordingsStatusByPath(
+        metas.map((m) => m.filePath),
+        "present",
+      );
+      await get().loadAll();
+      const recordings = get().recordings;
+      const newOnes = recordings.filter((r) =>
+        metas.some((m) => m.filePath === r.filePath),
+      );
+      get().startPeakComputation(newOnes);
+    })().catch((err) => console.error("handleFilesAdded:", err));
+  },
+
+  handleFilesRemoved: (paths) => {
+    void (async () => {
+      await setRecordingsStatusByPath(paths, "missing");
+      set({
+        recordings: get().recordings.map((r) =>
+          paths.includes(r.filePath) ? { ...r, status: "missing" as const } : r,
+        ),
+      });
+    })().catch((err) => console.error("handleFilesRemoved:", err));
   },
 
   createCollection: async (name) => {

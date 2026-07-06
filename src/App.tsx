@@ -8,6 +8,7 @@ import {
 } from "react-resizable-panels";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "./store";
+import { registerWatcherListeners } from "./lib/watcher";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
@@ -22,11 +23,22 @@ export default function App() {
   const selectedRecordingId = useStore((s) => s.selectedRecordingId);
   const status = useStore((s) => s.status);
   const loadAll = useStore((s) => s.loadAll);
-  const startPeakComputation = useStore((s) => s.startPeakComputation);
+  const reconcileLibrary = useStore((s) => s.reconcileLibrary);
+  const handleFilesAdded = useStore((s) => s.handleFilesAdded);
+  const handleFilesRemoved = useStore((s) => s.handleFilesRemoved);
 
   useEffect(() => {
-    loadAll().then(() => startPeakComputation());
-  }, [loadAll, startPeakComputation]);
+    let unlisten: (() => void) | null = null;
+    registerWatcherListeners(handleFilesAdded, handleFilesRemoved)
+      .then((fn) => {
+        unlisten = fn;
+        return loadAll();
+      })
+      .then(reconcileLibrary);
+    return () => {
+      unlisten?.();
+    };
+  }, [loadAll, reconcileLibrary, handleFilesAdded, handleFilesRemoved]);
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "graze-main",

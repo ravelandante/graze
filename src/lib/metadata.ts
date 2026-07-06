@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { Recording } from "../types";
+import type { RecordingInsert } from "./db";
 
 export async function extractMetadata(
   filePath: string,
-): Promise<Omit<Recording, "id" | "importedAt">> {
+): Promise<RecordingInsert> {
   return invoke("extract_metadata", { filePath });
 }
