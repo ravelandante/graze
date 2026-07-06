@@ -137,11 +137,14 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
+        .manage(watcher::WatcherState::default())
         .invoke_handler(tauri::generate_handler![
             compute_peaks,
             metadata::extract_metadata,
             scan::scan_folder,
             scan::paths_exist,
+            watcher::watch_paths,
+            watcher::unwatch_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
