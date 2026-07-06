@@ -53,6 +53,12 @@ async function migrate(db: Database) {
   `);
 
   await db.execute(`
+    CREATE TABLE IF NOT EXISTS watched_folders (
+      path TEXT PRIMARY KEY NOT NULL
+    )
+  `);
+
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS collections (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -103,8 +109,8 @@ export async function insertRecording(r: RecordingInsert): Promise<void> {
     `INSERT OR IGNORE INTO recordings
       (file_path, file_name, title, artist, comment, originator, originator_reference,
        time_reference, bwf_description, recorded_at, duration_seconds, sample_rate,
-       bit_depth, channels, format)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       bit_depth, channels, format, file_size_bytes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       r.filePath,
       r.fileName,
@@ -121,6 +127,7 @@ export async function insertRecording(r: RecordingInsert): Promise<void> {
       r.bitDepth,
       r.channels,
       r.format,
+      r.fileSizeBytes,
     ],
   );
 }
@@ -248,4 +255,24 @@ export async function setRecordingsStatusByPath(
     `UPDATE recordings SET status = ? WHERE file_path IN (${placeholders})`,
     [status, ...paths],
   );
+}
+
+export async function fetchWatchedFolders(): Promise<string[]> {
+  const d = await getDb();
+  const rows = await d.select<{ path: string }[]>(
+    "SELECT path FROM watched_folders",
+  );
+  return rows.map((r) => r.path);
+}
+
+export async function insertWatchedFolder(path: string): Promise<void> {
+  const d = await getDb();
+  await d.execute("INSERT OR IGNORE INTO watched_folders (path) VALUES (?)", [
+    path,
+  ]);
+}
+
+export async function deleteWatchedFolder(path: string): Promise<void> {
+  const d = await getDb();
+  await d.execute("DELETE FROM watched_folders WHERE path = ?", [path]);
 }
