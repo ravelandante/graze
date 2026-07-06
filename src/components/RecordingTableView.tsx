@@ -8,7 +8,12 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  FileExclamationPoint,
+} from "lucide-react";
 import { useState } from "react";
 import type { Recording } from "../types";
 import { formatTimeReference } from "../lib/format";
@@ -33,10 +38,14 @@ const columns = [
       const value = info.getValue();
       const isMissing = info.row.original.status === "missing";
       return (
-        <p className={`truncate ${value ? "text-white" : "text-zinc-500"}`}>
+        <p
+          className={`truncate ${value ? "text-white" : "text-zinc-500"} flex gap-1`}
+        >
           {value ?? "No title"}
           {isMissing && (
-            <span className="ml-2 text-amber-500 font-normal">Missing</span>
+            <span title="File missing">
+              <FileExclamationPoint color="#FFC107" size={16} />
+            </span>
           )}
         </p>
       );
