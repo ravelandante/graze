@@ -41,7 +41,13 @@ export function RecordingList({ visibleRecordings }: Props) {
 
   const [columnVisibility, setColumnVisibility] =
     useState<RecordingColumnVisibility>(() =>
-      loadSetting("tableColumnVisibility", {}),
+      loadSetting("tableColumnVisibility", {
+        channels: false,
+        format: false,
+        bitDepth: false,
+        sampleRate: false,
+        importedAt: false,
+      }),
     );
   const [watchedFoldersOpen, setWatchedFoldersOpen] = useState(false);
 
