@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AudioWaveform,
   ChevronDown,
@@ -66,9 +66,16 @@ export function Playbar({
   const [waveformHeight, setWaveformHeight] = useState(() =>
     loadSetting("waveformHeight", 128),
   );
-  const [maxWaveformHeight] = useState(() =>
+  const [maxWaveformHeight, setMaxWaveformHeight] = useState(() =>
     Math.floor(window.innerHeight / 2),
   );
+  useEffect(() => {
+    function onResize() {
+      setMaxWaveformHeight(Math.floor(window.innerHeight / 2));
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const [isHeightDragging, setIsHeightDragging] = useState(false);
 
   function startHeightResize(e: React.MouseEvent) {
