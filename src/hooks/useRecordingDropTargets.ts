@@ -11,6 +11,7 @@ export function useRecordingDropTargets(
       onDragOver(e: React.DragEvent) {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
+        setDragOverId(targetId);
       },
       onDragEnter(e: React.DragEvent) {
         e.preventDefault();
