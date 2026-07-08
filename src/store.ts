@@ -10,6 +10,7 @@ import {
   fetchMemberships,
   fetchWatchedFolders,
   insertWatchedFolder,
+  deleteWatchedFolder,
   getExistingPeaks,
   fetchRecordings,
   insertCollection,
@@ -45,6 +46,7 @@ interface AppState {
   startPeakComputation: (targets?: Recording[]) => void;
   reconcileLibrary: () => Promise<void>;
   addWatchedFolder: (path: string) => Promise<void>;
+  removeWatchedFolder: (path: string) => Promise<void>;
   handleFilesAdded: (metas: RecordingInsert[]) => void;
   handleFilesRemoved: (paths: string[]) => void;
   setSelectedRecordingId: (id: number | null) => void;
@@ -235,6 +237,12 @@ export const useStore = create<AppState>((set, get) => ({
       metas.some((m) => m.filePath === r.filePath),
     );
     get().startPeakComputation(newOnes);
+  },
+
+  removeWatchedFolder: async (path) => {
+    await deleteWatchedFolder(path);
+    await invoke("unwatch_folder", { path });
+    set({ watchedFolders: get().watchedFolders.filter((f) => f !== path) });
   },
 
   handleFilesAdded: (metas) => {
