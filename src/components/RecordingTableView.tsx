@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { Recording, RecordingColumnVisibility } from "../types";
-import { formatTimeReference } from "../lib/format";
+import { formatTime, formatTimeReference } from "../lib/format";
 import { useStore } from "../store";
 import { RecordingContextMenu } from "./RecordingContextMenu";
 import { useRecordingSelection } from "../hooks/useRecordingSelection";
@@ -77,6 +77,75 @@ const columns = [
           info.row.original.sampleRate,
           info.row.original.recordedAt,
         )}
+      </span>
+    ),
+  }),
+  col.accessor("durationSeconds", {
+    header: "Duration",
+    size: 70,
+    minSize: 50,
+    cell: (info) => {
+      const v = info.getValue();
+      return (
+        <span className="tabular-nums text-zinc-400">
+          {v != null ? formatTime(v) : "—"}
+        </span>
+      );
+    },
+  }),
+  col.accessor("channels", {
+    header: "Ch.",
+    size: 45,
+    minSize: 40,
+    cell: (info) => (
+      <span className="tabular-nums text-zinc-400">
+        {info.getValue() ?? "—"}
+      </span>
+    ),
+  }),
+  col.accessor("format", {
+    header: "Format",
+    size: 65,
+    minSize: 50,
+    cell: (info) => (
+      <span className="text-zinc-400">
+        {info.getValue()?.toUpperCase() ?? "—"}
+      </span>
+    ),
+  }),
+  col.accessor("bitDepth", {
+    header: "Bit Depth",
+    size: 80,
+    minSize: 60,
+    cell: (info) => {
+      const v = info.getValue();
+      return (
+        <span className="tabular-nums text-zinc-400">
+          {v != null ? `${v}-bit` : "—"}
+        </span>
+      );
+    },
+  }),
+  col.accessor("sampleRate", {
+    header: "Sample Rate",
+    size: 95,
+    minSize: 70,
+    cell: (info) => {
+      const v = info.getValue();
+      return (
+        <span className="tabular-nums text-zinc-400">
+          {v != null ? `${v / 1000} kHz` : "—"}
+        </span>
+      );
+    },
+  }),
+  col.accessor("importedAt", {
+    header: "Imported",
+    size: 90,
+    minSize: 70,
+    cell: (info) => (
+      <span className="tabular-nums text-zinc-400">
+        {info.getValue().split("T")[0]}
       </span>
     ),
   }),

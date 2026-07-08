@@ -23,7 +23,13 @@ const TABLE_COLUMNS: { id: RecordingColumn; label: string }[] = [
   { id: "title", label: "Title" },
   { id: "fileName", label: "Filename" },
   { id: "originator", label: "Device" },
-  { id: "timeReference", label: "TimeRef" },
+  { id: "timeReference", label: "Time Reference" },
+  { id: "durationSeconds", label: "Duration" },
+  { id: "channels", label: "Channels" },
+  { id: "format", label: "Format" },
+  { id: "bitDepth", label: "Bit Depth" },
+  { id: "sampleRate", label: "Sample Rate" },
+  { id: "importedAt", label: "Imported" },
 ];
 
 export function RecordingList({ visibleRecordings }: Props) {
