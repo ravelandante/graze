@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { formatTimeReference } from "../lib/format";
 import { useStore } from "../store";
 
 function MetaRow({
@@ -119,12 +118,8 @@ export function RecordingDetail() {
             </h3>
             <MetaRow label="Device" value={recording.originator} />
             <MetaRow
-              label="TimeReference"
-              value={formatTimeReference(
-                recording.timeReference,
-                recording.sampleRate,
-                recording.recordedAt,
-              )}
+              label="Recorded at"
+              value={recording.recordedAt?.replace("T", " ") ?? null}
             />
             <MetaRow label="Description" value={recording.bwfDescription} />
           </div>

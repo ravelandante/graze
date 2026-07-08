@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { Recording, RecordingColumnVisibility } from "../types";
-import { formatTime, formatTimeReference } from "../lib/format";
+import { formatTime } from "../lib/format";
 import { useStore } from "../store";
 import { RecordingContextMenu } from "./RecordingContextMenu";
 import { useRecordingSelection } from "../hooks/useRecordingSelection";
@@ -65,18 +65,14 @@ const columns = [
       <p className="truncate text-zinc-400">{info.getValue() ?? "—"}</p>
     ),
   }),
-  col.display({
-    id: "timeReference",
-    header: "Time Reference",
-    size: 120,
-    minSize: 60,
+
+  col.accessor("recordedAt", {
+    header: "Recorded At",
+    size: 140,
+    minSize: 90,
     cell: (info) => (
       <span className="tabular-nums text-zinc-400">
-        {formatTimeReference(
-          info.row.original.timeReference,
-          info.row.original.sampleRate,
-          info.row.original.recordedAt,
-        )}
+        {info.getValue()?.replace("T", " ") ?? "—"}
       </span>
     ),
   }),
