@@ -176,7 +176,12 @@ export const createLibrarySlice: StateCreator<
   },
 
   deleteCollection: async (id) => {
-    if (get().selectedCollectionId === id) set({ selectedCollectionId: null });
+    const { filterCollectionIds } = get();
+    if (filterCollectionIds.has(id)) {
+      const next = new Set(filterCollectionIds);
+      next.delete(id);
+      set({ filterCollectionIds: next });
+    }
     await dbDeleteCollection(id);
     await get().loadAll();
   },

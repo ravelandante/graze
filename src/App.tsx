@@ -18,7 +18,7 @@ import { useAudioPlayer } from "./hooks/useAudioPlayer";
 export default function App() {
   const recordings = useStore((s) => s.recordings);
   const memberships = useStore((s) => s.memberships);
-  const selectedCollectionId = useStore((s) => s.selectedCollectionId);
+  const filterCollectionIds = useStore((s) => s.filterCollectionIds);
   const searchQuery = useStore((s) => s.searchQuery);
   const selectedRecordingId = useStore((s) => s.selectedRecordingId);
   const status = useStore((s) => s.status);
@@ -51,13 +51,14 @@ export default function App() {
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
   const visibleRecordings = useMemo(() => {
-    const collectionIds =
-      selectedCollectionId !== null
-        ? (memberships.get(selectedCollectionId) ?? new Set<number>())
-        : null;
     const q = searchQuery.toLowerCase();
     return recordings.filter((r) => {
-      if (collectionIds && !collectionIds.has(r.id)) return false;
+      if (filterCollectionIds.size > 0) {
+        const inAny = [...filterCollectionIds].some((cid) =>
+          memberships.get(cid)?.has(r.id),
+        );
+        if (!inAny) return false;
+      }
       if (!q) return true;
       return (
         r.fileName?.toLowerCase().includes(q) ||
@@ -66,7 +67,7 @@ export default function App() {
         r.originator?.toLowerCase().includes(q)
       );
     });
-  }, [recordings, memberships, selectedCollectionId, searchQuery]);
+  }, [recordings, memberships, filterCollectionIds, searchQuery]);
 
   const {
     isPlaying,

@@ -6,14 +6,20 @@ type FilterView = "root" | "collection";
 
 export function FilterMenu() {
   const collections = useStore((s) => s.collections);
-  const selectedCollectionId = useStore((s) => s.selectedCollectionId);
-  const setSelectedCollectionId = useStore((s) => s.setSelectedCollectionId);
+  const filterCollectionIds = useStore((s) => s.filterCollectionIds);
+  const setFilterCollectionIds = useStore((s) => s.setFilterCollectionIds);
 
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<FilterView>("root");
 
-  const activeCollection =
-    collections.find((c) => c.id === selectedCollectionId) ?? null;
+  const activeCount = filterCollectionIds.size;
+  const chipLabel =
+    activeCount === 1
+      ? (collections.find((c) => c.id === [...filterCollectionIds][0])?.name ??
+        "")
+      : activeCount > 1
+        ? `${activeCount} collections`
+        : null;
 
   useEffect(() => {
     if (!open) return;
@@ -41,6 +47,13 @@ export function FilterMenu() {
     setView("root");
   }
 
+  function toggleCollection(id: number) {
+    const next = new Set(filterCollectionIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setFilterCollectionIds(next);
+  }
+
   return (
     <div className="relative flex items-center gap-1">
       <button
@@ -51,11 +64,11 @@ export function FilterMenu() {
         <ListFilterPlus size={14} strokeWidth={1.5} />
       </button>
 
-      {activeCollection && (
+      {chipLabel && (
         <span className="flex items-center gap-1 text-xs bg-zinc-700 text-zinc-300 rounded px-1.5 py-0.5">
-          {activeCollection.name}
+          {chipLabel}
           <button
-            onClick={() => setSelectedCollectionId(null)}
+            onClick={() => setFilterCollectionIds(new Set())}
             className="text-zinc-500 hover:text-zinc-200"
             title="Clear filter"
           >
@@ -105,14 +118,12 @@ export function FilterMenu() {
                       key={c.id}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedCollectionId(
-                          selectedCollectionId === c.id ? null : c.id,
-                        );
+                        toggleCollection(c.id);
                       }}
                       className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
                     >
                       <span className="truncate">{c.name}</span>
-                      {selectedCollectionId === c.id && (
+                      {filterCollectionIds.has(c.id) && (
                         <Check
                           size={12}
                           strokeWidth={2}

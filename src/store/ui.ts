@@ -7,7 +7,7 @@ export const createUiSlice: StateCreator<AppState, [], [], UiSlice> = (
 ) => ({
   selectedRecordingId: null,
   selectedIds: new Set<number>(),
-  selectedCollectionId: null,
+  filterCollectionIds: new Set<number>(),
   searchQuery: "",
   status: null,
 
@@ -21,7 +21,7 @@ export const createUiSlice: StateCreator<AppState, [], [], UiSlice> = (
     });
   },
   setSelectedIds: (ids) => set({ selectedIds: ids }),
-  setSelectedCollectionId: (id) => set({ selectedCollectionId: id }),
+  setFilterCollectionIds: (ids) => set({ filterCollectionIds: ids }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStatus: (s) => set({ status: s }),
 });

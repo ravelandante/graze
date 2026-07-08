@@ -4,13 +4,13 @@ import type { Collection, Recording } from "../types";
 export interface UiSlice {
   selectedRecordingId: number | null;
   selectedIds: Set<number>;
-  selectedCollectionId: number | null;
+  filterCollectionIds: Set<number>;
   searchQuery: string;
   status: string | null;
 
   setSelectedRecordingId: (id: number | null) => void;
   setSelectedIds: (ids: Set<number>) => void;
-  setSelectedCollectionId: (id: number | null) => void;
+  setFilterCollectionIds: (ids: Set<number>) => void;
   setSearchQuery: (q: string) => void;
   setStatus: (s: string | null) => void;
 }

@@ -5,8 +5,8 @@ import { useRecordingDropTargets } from "../hooks/useRecordingDropTargets";
 
 export function CollectionSidebar() {
   const collections = useStore((s) => s.collections);
-  const selectedId = useStore((s) => s.selectedCollectionId);
-  const setSelectedId = useStore((s) => s.setSelectedCollectionId);
+  const filterCollectionIds = useStore((s) => s.filterCollectionIds);
+  const setFilterCollectionIds = useStore((s) => s.setFilterCollectionIds);
   const createCollection = useStore((s) => s.createCollection);
   const renameCollection = useStore((s) => s.renameCollection);
   const deleteCollection = useStore((s) => s.deleteCollection);
@@ -16,6 +16,10 @@ export function CollectionSidebar() {
   const { dragOverId, getDropProps } = useRecordingDropTargets(
     addRecordingsToCollection,
   );
+
+  const isMultiple = filterCollectionIds.size > 1;
+  const singleSelectedId =
+    filterCollectionIds.size === 1 ? [...filterCollectionIds][0] : null;
 
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
@@ -83,9 +87,9 @@ export function CollectionSidebar() {
 
       <nav className="flex-1 overflow-y-auto">
         <button
-          onClick={() => setSelectedId(null)}
+          onClick={() => setFilterCollectionIds(new Set())}
           className={`w-full text-left px-4 py-2 text-sm truncate ${
-            selectedId === null
+            filterCollectionIds.size === 0
               ? "bg-zinc-700 text-white"
               : "text-zinc-300 hover:bg-zinc-800"
           }`}
@@ -100,7 +104,7 @@ export function CollectionSidebar() {
             className={`group flex items-center transition-colors ${
               dragOverId === c.id
                 ? "bg-zinc-600 ring-1 ring-inset ring-zinc-500"
-                : selectedId === c.id
+                : singleSelectedId === c.id
                   ? "bg-zinc-700"
                   : "hover:bg-zinc-800"
             }`}
@@ -117,9 +121,9 @@ export function CollectionSidebar() {
             ) : (
               <>
                 <button
-                  onClick={() => setSelectedId(c.id)}
+                  onClick={() => setFilterCollectionIds(new Set([c.id]))}
                   className={`flex-1 text-left px-4 py-2 text-sm truncate min-w-0 ${
-                    selectedId === c.id ? "text-white" : "text-zinc-300"
+                    singleSelectedId === c.id ? "text-white" : "text-zinc-300"
                   }`}
                 >
                   {c.name}
@@ -150,6 +154,12 @@ export function CollectionSidebar() {
             )}
           </div>
         ))}
+
+        {isMultiple && (
+          <div className="w-full px-4 py-2 text-sm truncate bg-zinc-700 italic text-zinc-500">
+            (multiple)
+          </div>
+        )}
 
         {creating && (
           <input
