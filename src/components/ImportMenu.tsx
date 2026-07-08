@@ -5,9 +5,15 @@ interface Props {
   onImport: () => void;
   onImportFolder: () => void;
   onWatchFolder: () => void;
+  onManageWatchedFolders: () => void;
 }
 
-export function ImportMenu({ onImport, onImportFolder, onWatchFolder }: Props) {
+export function ImportMenu({
+  onImport,
+  onImportFolder,
+  onWatchFolder,
+  onManageWatchedFolders,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -49,6 +55,16 @@ export function ImportMenu({ onImport, onImportFolder, onWatchFolder }: Props) {
               className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Watch folder
+            </button>
+            <hr className="border-zinc-700" />
+            <button
+              onClick={() => {
+                setOpen(false);
+                onManageWatchedFolders();
+              }}
+              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+            >
+              Manage watched folders
             </button>
           </div>
         </>

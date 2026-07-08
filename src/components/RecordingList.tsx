@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WatchedFoldersModal } from "./WatchedFoldersModal";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
@@ -30,6 +31,7 @@ export function RecordingList({ visibleRecordings }: Props) {
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(() => loadSetting("tableColumnVisibility", {}));
+  const [watchedFoldersOpen, setWatchedFoldersOpen] = useState(false);
 
   function handleColumnVisibilityChange(next: Record<string, boolean>) {
     setColumnVisibility(next);
@@ -82,6 +84,7 @@ export function RecordingList({ visibleRecordings }: Props) {
           onImport={handleImport}
           onImportFolder={handleImportFolder}
           onWatchFolder={handleWatchFolder}
+          onManageWatchedFolders={() => setWatchedFoldersOpen(true)}
         />
       </div>
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
@@ -93,6 +96,9 @@ export function RecordingList({ visibleRecordings }: Props) {
           />
         </div>
       </div>
+      {watchedFoldersOpen && (
+        <WatchedFoldersModal onClose={() => setWatchedFoldersOpen(false)} />
+      )}
       <RecordingTableView
         recordings={visibleRecordings}
         columnVisibility={columnVisibility}
