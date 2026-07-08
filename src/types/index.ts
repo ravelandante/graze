@@ -24,6 +24,11 @@ export interface Recording {
   status: RecordingStatus;
 }
 
+export type RecordingColumn = keyof Recording;
+export type RecordingColumnVisibility = Partial<
+  Record<RecordingColumn, boolean>
+>;
+
 export interface Collection {
   id: number;
   name: string;

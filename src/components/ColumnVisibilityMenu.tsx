@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Check, Columns3 } from "lucide-react";
+import type { RecordingColumn, RecordingColumnVisibility } from "../types";
 
 interface ColumnDef {
-  id: string;
+  id: RecordingColumn;
   label: string;
 }
 
 interface Props {
   columns: ColumnDef[];
-  visibility: Record<string, boolean>;
-  onChange: (next: Record<string, boolean>) => void;
+  visibility: RecordingColumnVisibility;
+  onChange: (next: RecordingColumnVisibility) => void;
 }
 
 export function ColumnVisibilityMenu({ columns, visibility, onChange }: Props) {

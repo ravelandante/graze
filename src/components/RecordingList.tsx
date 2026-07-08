@@ -6,7 +6,11 @@ import { join } from "@tauri-apps/api/path";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
 import { FilterMenu } from "./FilterMenu";
 import { ImportMenu } from "./ImportMenu";
-import type { Recording } from "../types";
+import type {
+  Recording,
+  RecordingColumn,
+  RecordingColumnVisibility,
+} from "../types";
 import { RecordingTableView } from "./RecordingTableView";
 import { loadSetting, saveSetting } from "../lib/settings";
 import { useStore } from "../store";
@@ -15,11 +19,11 @@ interface Props {
   visibleRecordings: Recording[];
 }
 
-const TABLE_COLUMNS = [
+const TABLE_COLUMNS: { id: RecordingColumn; label: string }[] = [
   { id: "title", label: "Title" },
   { id: "fileName", label: "Filename" },
   { id: "originator", label: "Device" },
-  { id: "timeRef", label: "TimeRef" },
+  { id: "timeReference", label: "TimeRef" },
 ];
 
 export function RecordingList({ visibleRecordings }: Props) {
@@ -29,12 +33,13 @@ export function RecordingList({ visibleRecordings }: Props) {
   const addWatchedFolder = useStore((s) => s.addWatchedFolder);
   const setStatus = useStore((s) => s.setStatus);
 
-  const [columnVisibility, setColumnVisibility] = useState<
-    Record<string, boolean>
-  >(() => loadSetting("tableColumnVisibility", {}));
+  const [columnVisibility, setColumnVisibility] =
+    useState<RecordingColumnVisibility>(() =>
+      loadSetting("tableColumnVisibility", {}),
+    );
   const [watchedFoldersOpen, setWatchedFoldersOpen] = useState(false);
 
-  function handleColumnVisibilityChange(next: Record<string, boolean>) {
+  function handleColumnVisibilityChange(next: RecordingColumnVisibility) {
     setColumnVisibility(next);
     saveSetting("tableColumnVisibility", next);
   }

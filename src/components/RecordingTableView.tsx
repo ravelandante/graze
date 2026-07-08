@@ -15,7 +15,7 @@ import {
   FileExclamationPoint,
 } from "lucide-react";
 import { useState } from "react";
-import type { Recording } from "../types";
+import type { Recording, RecordingColumnVisibility } from "../types";
 import { formatTimeReference } from "../lib/format";
 import { useStore } from "../store";
 import { RecordingContextMenu } from "./RecordingContextMenu";
@@ -23,8 +23,8 @@ import { useRecordingSelection } from "../hooks/useRecordingSelection";
 
 interface Props {
   recordings: Recording[];
-  columnVisibility: Record<string, boolean>;
-  onColumnVisibilityChange: (next: Record<string, boolean>) => void;
+  columnVisibility: RecordingColumnVisibility;
+  onColumnVisibilityChange: (next: RecordingColumnVisibility) => void;
 }
 
 const col = createColumnHelper<Recording>();
@@ -66,7 +66,7 @@ const columns = [
     ),
   }),
   col.display({
-    id: "timeRef",
+    id: "timeReference",
     header: "Time Reference",
     size: 120,
     minSize: 60,
@@ -126,7 +126,7 @@ export function RecordingTableView({
         typeof updater === "function"
           ? updater(columnVisibility as VisibilityState)
           : updater;
-      onColumnVisibilityChange(next);
+      onColumnVisibilityChange(next as RecordingColumnVisibility);
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
