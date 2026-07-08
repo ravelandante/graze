@@ -72,7 +72,7 @@ export function RecordingList({ visibleRecordings }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="px-3 py-2 border-b border-zinc-800 flex gap-2">
+      <div className="px-3 py-2 border-b border-zinc-800 flex gap-2 items-center">
         <input
           type="text"
           value={searchQuery}
