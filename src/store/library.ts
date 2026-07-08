@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
+import type { StateCreator } from "zustand";
 import {
   addRecordingToCollection,
   removeRecordingFromCollection,
@@ -15,65 +15,14 @@ import {
   fetchRecordings,
   insertCollection,
   insertRecording,
-  savePeaks,
   setRecordingsStatus,
   setRecordingsStatusByPath,
   updateRecording,
   type RecordingInsert,
-} from "./lib/db";
-import { extractMetadata } from "./lib/metadata";
-import { normalizeFile, trimFile, writeFileMetadata } from "./lib/audio";
-import type { Collection, Recording } from "./types";
-
-interface AppState {
-  recordings: Recording[];
-  collections: Collection[];
-  watchedFolders: string[];
-  // collectionId → Set<recordingId>
-  memberships: Map<number, Set<number>>;
-  // recordingId → Set<collectionId> (inverse of memberships, computed on load)
-  recordingMemberships: Map<number, Set<number>>;
-  // recordingId → peaks (one float array per channel)
-  peaksMap: Map<number, number[][]>;
-
-  selectedRecordingId: number | null;
-  selectedIds: Set<number>;
-  selectedCollectionId: number | null;
-  searchQuery: string;
-  status: string | null;
-
-  loadAll: () => Promise<void>;
-  startPeakComputation: (targets?: Recording[]) => void;
-  reconcileLibrary: () => Promise<void>;
-  addWatchedFolder: (path: string) => Promise<void>;
-  removeWatchedFolder: (path: string) => Promise<void>;
-  handleFilesAdded: (metas: RecordingInsert[]) => void;
-  handleFilesRemoved: (paths: string[]) => void;
-  setSelectedRecordingId: (id: number | null) => void;
-  setSelectedIds: (ids: Set<number>) => void;
-  setSelectedCollectionId: (id: number | null) => void;
-  setSearchQuery: (q: string) => void;
-  setStatus: (s: string | null) => void;
-
-  createCollection: (name: string) => Promise<void>;
-  renameCollection: (id: number, name: string) => Promise<void>;
-  deleteCollection: (id: number) => Promise<void>;
-  toggleCollectionMembership: (
-    recordingIds: number[],
-    collectionId: number,
-    isMember: boolean,
-  ) => Promise<void>;
-
-  removeRecording: (ids: number[]) => Promise<void>;
-  importRecordings: (filePaths: string[]) => Promise<void>;
-  addRecordingsToCollection: (
-    recordingIds: number[],
-    collectionId: number,
-  ) => Promise<void>;
-  saveRecording: (updates: Partial<Recording>) => Promise<void>;
-  normalizeRecording: () => Promise<void>;
-  trimRecording: (start: number, end: number) => Promise<void>;
-}
+} from "../lib/db";
+import { extractMetadata } from "../lib/metadata";
+import { normalizeFile, trimFile, writeFileMetadata } from "../lib/audio";
+import type { AppState, LibrarySlice } from "./types";
 
 function invertMemberships(
   memberships: Map<number, Set<number>>,
@@ -88,18 +37,17 @@ function invertMemberships(
   return result;
 }
 
-export const useStore = create<AppState>((set, get) => ({
+export const createLibrarySlice: StateCreator<
+  AppState,
+  [],
+  [],
+  LibrarySlice
+> = (set, get) => ({
   recordings: [],
   collections: [],
   watchedFolders: [],
   memberships: new Map(),
   recordingMemberships: new Map(),
-  peaksMap: new Map(),
-  selectedRecordingId: null,
-  selectedIds: new Set<number>(),
-  selectedCollectionId: null,
-  searchQuery: "",
-  status: null,
 
   loadAll: async () => {
     const [recordings, collections, memberships, peaksMap] = await Promise.all([
@@ -116,63 +64,6 @@ export const useStore = create<AppState>((set, get) => ({
       peaksMap,
     });
   },
-
-  startPeakComputation: (targets?: Recording[]) => {
-    const { recordings, peaksMap } = get();
-    const pending = targets
-      ? targets.filter((r) => r.status !== "missing")
-      : recordings.filter((r) => r.status !== "missing" && !peaksMap.has(r.id));
-    if (pending.length === 0) return;
-
-    const CONCURRENCY = 2;
-    let inFlight = 0;
-    let index = 0;
-
-    function processNext() {
-      while (inFlight < CONCURRENCY && index < pending.length) {
-        const recordingToCompute = pending[index++];
-        inFlight++;
-        void (async () => {
-          try {
-            const peaks = await invoke<number[][]>("compute_peaks", {
-              filePath: recordingToCompute.filePath,
-            });
-            await savePeaks(recordingToCompute.id, peaks);
-            set((state) => ({
-              peaksMap: new Map(state.peaksMap).set(
-                recordingToCompute.id,
-                peaks,
-              ),
-            }));
-          } catch (err) {
-            console.warn(
-              `Peak computation failed for ${recordingToCompute.fileName}:`,
-              err,
-            );
-          } finally {
-            inFlight--;
-            processNext();
-          }
-        })();
-      }
-    }
-
-    processNext();
-  },
-
-  setSelectedRecordingId: (id) => {
-    const { selectedIds } = get();
-    set({
-      selectedRecordingId: id,
-      ...(selectedIds.size <= 1
-        ? { selectedIds: id !== null ? new Set([id]) : new Set<number>() }
-        : {}),
-    });
-  },
-  setSelectedIds: (ids) => set({ selectedIds: ids }),
-  setSelectedCollectionId: (id) => set({ selectedCollectionId: id }),
-  setSearchQuery: (q) => set({ searchQuery: q }),
-  setStatus: (s) => set({ status: s }),
 
   reconcileLibrary: async () => {
     const folders = await fetchWatchedFolders();
@@ -403,4 +294,4 @@ export const useStore = create<AppState>((set, get) => ({
     }
     setTimeout(() => set({ status: null }), 4000);
   },
-}));
+});
