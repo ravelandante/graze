@@ -29,6 +29,44 @@ interface Props {
 
 const col = createColumnHelper<Recording>();
 
+function textCol<K extends keyof Recording>(
+  key: K,
+  header: string,
+  size: number,
+  minSize: number,
+  render: (v: Recording[K]) => string,
+) {
+  return col.accessor(key, {
+    header,
+    size,
+    minSize,
+    cell: (info) => (
+      <p className="truncate text-zinc-400">
+        {render(info.getValue() as unknown as Recording[K])}
+      </p>
+    ),
+  });
+}
+
+function numericCol<K extends keyof Recording>(
+  key: K,
+  header: string,
+  size: number,
+  minSize: number,
+  render: (v: Recording[K]) => string,
+) {
+  return col.accessor(key, {
+    header,
+    size,
+    minSize,
+    cell: (info) => (
+      <span className="tabular-nums text-zinc-400">
+        {render(info.getValue() as unknown as Recording[K])}
+      </span>
+    ),
+  });
+}
+
 const columns = [
   col.accessor("title", {
     header: "Title",
@@ -51,100 +89,27 @@ const columns = [
       );
     },
   }),
-  col.accessor("fileName", {
-    header: "Filename",
-    size: 200,
-    minSize: 80,
-    cell: (info) => <p className="truncate text-zinc-400">{info.getValue()}</p>,
-  }),
-  col.accessor("originator", {
-    header: "Device",
-    size: 150,
-    minSize: 60,
-    cell: (info) => (
-      <p className="truncate text-zinc-400">{info.getValue() ?? "—"}</p>
-    ),
-  }),
-
-  col.accessor("recordedAt", {
-    header: "Recorded At",
-    size: 140,
-    minSize: 90,
-    cell: (info) => (
-      <span className="tabular-nums text-zinc-400">
-        {info.getValue()?.replace("T", " ") ?? "—"}
-      </span>
-    ),
-  }),
-  col.accessor("durationSeconds", {
-    header: "Duration",
-    size: 70,
-    minSize: 50,
-    cell: (info) => {
-      const v = info.getValue();
-      return (
-        <span className="tabular-nums text-zinc-400">
-          {v != null ? formatTime(v) : "—"}
-        </span>
-      );
-    },
-  }),
-  col.accessor("channels", {
-    header: "Ch.",
-    size: 45,
-    minSize: 40,
-    cell: (info) => (
-      <span className="tabular-nums text-zinc-400">
-        {info.getValue() ?? "—"}
-      </span>
-    ),
-  }),
-  col.accessor("format", {
-    header: "Format",
-    size: 65,
-    minSize: 50,
-    cell: (info) => (
-      <span className="text-zinc-400">
-        {info.getValue()?.toUpperCase() ?? "—"}
-      </span>
-    ),
-  }),
-  col.accessor("bitDepth", {
-    header: "Bit Depth",
-    size: 80,
-    minSize: 60,
-    cell: (info) => {
-      const v = info.getValue();
-      return (
-        <span className="tabular-nums text-zinc-400">
-          {v != null ? `${v}-bit` : "—"}
-        </span>
-      );
-    },
-  }),
-  col.accessor("sampleRate", {
-    header: "Sample Rate",
-    size: 95,
-    minSize: 70,
-    cell: (info) => {
-      const v = info.getValue();
-      return (
-        <span className="tabular-nums text-zinc-400">
-          {v != null ? `${v / 1000} kHz` : "—"}
-        </span>
-      );
-    },
-  }),
-  col.accessor("importedAt", {
-    header: "Imported",
-    size: 90,
-    minSize: 70,
-    cell: (info) => (
-      <span className="tabular-nums text-zinc-400">
-        {info.getValue().split("T")[0]}
-      </span>
-    ),
-  }),
+  textCol("fileName", "Filename", 200, 80, (v) => v),
+  textCol("originator", "Device", 150, 60, (v) => v ?? "—"),
+  numericCol(
+    "recordedAt",
+    "Recorded At",
+    140,
+    90,
+    (v) => v?.replace("T", " ") ?? "—",
+  ),
+  numericCol("durationSeconds", "Duration", 70, 50, (v) =>
+    v != null ? formatTime(v) : "—",
+  ),
+  numericCol("channels", "Ch.", 45, 40, (v) => (v != null ? String(v) : "—")),
+  textCol("format", "Format", 65, 50, (v) => v?.toUpperCase() ?? "—"),
+  numericCol("bitDepth", "Bit Depth", 80, 60, (v) =>
+    v != null ? `${v}-bit` : "—",
+  ),
+  numericCol("sampleRate", "Sample Rate", 95, 70, (v) =>
+    v != null ? `${v / 1000} kHz` : "—",
+  ),
+  numericCol("importedAt", "Imported", 90, 70, (v) => v.split("T")[0]),
 ];
 
 export function RecordingTableView({
