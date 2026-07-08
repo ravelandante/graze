@@ -4,6 +4,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { readDir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
+import { FilterMenu } from "./FilterMenu";
 import { ImportMenu } from "./ImportMenu";
 import type { Recording } from "../types";
 import { RecordingTableView } from "./RecordingTableView";
@@ -88,6 +89,7 @@ export function RecordingList({ visibleRecordings }: Props) {
         />
       </div>
       <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-1">
+        <FilterMenu />
         <div className="ml-auto">
           <ColumnVisibilityMenu
             columns={TABLE_COLUMNS}
