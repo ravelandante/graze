@@ -24,7 +24,7 @@ export function Modal({ title, onClose, children }: Props) {
           <h2 className="text-sm font-semibold text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded"
+            className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded cursor-pointer"
           >
             <X size={14} strokeWidth={2} />
           </button>
