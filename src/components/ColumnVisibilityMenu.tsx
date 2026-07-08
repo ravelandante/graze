@@ -36,7 +36,7 @@ export function ColumnVisibilityMenu({ columns, visibility, onChange }: Props) {
                   onClick={() =>
                     onChange({ ...visibility, [col.id]: !visible })
                   }
-                  className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-2"
+                  className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-2"
                 >
                   <span>{col.label}</span>
                   {visible && (

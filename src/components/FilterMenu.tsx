@@ -87,7 +87,7 @@ export function FilterMenu() {
                   e.stopPropagation();
                   setView("collection");
                 }}
-                className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+                className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
               >
                 <span>Collection</span>
                 <ChevronRight
@@ -103,13 +103,13 @@ export function FilterMenu() {
                     e.stopPropagation();
                     setView("root");
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1.5"
+                  className="w-full text-left px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1.5"
                 >
                   ← Collection
                 </button>
                 <div className="border-t border-zinc-700 mx-1 mb-1" />
                 {collections.length === 0 ? (
-                  <p className="px-3 py-1.5 text-xs text-zinc-500">
+                  <p className="px-2.5 py-1 text-xs text-zinc-500">
                     No collections yet
                   </p>
                 ) : (
@@ -120,7 +120,7 @@ export function FilterMenu() {
                         e.stopPropagation();
                         toggleCollection(c.id);
                       }}
-                      className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+                      className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
                     >
                       <span className="truncate">{c.name}</span>
                       {filterCollectionIds.has(c.id) && (

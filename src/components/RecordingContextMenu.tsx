@@ -68,7 +68,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
                 e.stopPropagation();
                 setShowCollections(true);
               }}
-              className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
             >
               <span>Edit collection</span>
               <ChevronRight
@@ -84,7 +84,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
                 removeRecording(selectedIds);
                 onClose();
               }}
-              className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-zinc-700 flex items-center justify-between gap-3"
+              className="w-full text-left px-2.5 py-1 text-sm text-red-400 hover:bg-zinc-700 flex items-center justify-between gap-3"
             >
               <span>Remove from library</span>
               <Trash2 size={12} strokeWidth={1.5} className="shrink-0" />
@@ -97,13 +97,13 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
                 e.stopPropagation();
                 setShowCollections(false);
               }}
-              className="w-full text-left px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1.5"
+              className="w-full text-left px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1.5"
             >
               ← Collections
             </button>
             <div className="border-t border-zinc-700 mx-1 mb-1" />
             {collections.length === 0 ? (
-              <p className="px-3 py-1.5 text-xs text-zinc-500">
+              <p className="px-2.5 py-1 text-xs text-zinc-500">
                 No collections yet
               </p>
             ) : (
@@ -116,7 +116,7 @@ export function RecordingContextMenu({ recordingId, x, y, onClose }: Props) {
                       toggleCollectionMembership(selectedIds, c.id, isMember);
                       onClose();
                     }}
-                    className="w-full text-left px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+                    className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
                   >
                     <span className="truncate">{c.name}</span>
                     {isMember && (

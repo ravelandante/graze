@@ -34,7 +34,7 @@ export function ImportMenu({
                 setOpen(false);
                 onImport();
               }}
-              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Import files
             </button>
@@ -43,7 +43,7 @@ export function ImportMenu({
                 setOpen(false);
                 onImportFolder();
               }}
-              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Import folder
             </button>
@@ -52,7 +52,7 @@ export function ImportMenu({
                 setOpen(false);
                 onWatchFolder();
               }}
-              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Watch folder
             </button>
@@ -62,7 +62,7 @@ export function ImportMenu({
                 setOpen(false);
                 onManageWatchedFolders();
               }}
-              className="w-full text-left px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700"
+              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
             >
               Manage watched folders
             </button>
