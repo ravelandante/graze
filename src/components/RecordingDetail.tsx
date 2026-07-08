@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useStore } from "../store";
 
 function MetaRow({
@@ -99,6 +100,16 @@ export function RecordingDetail() {
               File info
             </h3>
             <MetaRow label="File" value={recording.fileName} />
+            <span className="text-xs text-zinc-500 py-1.5 pr-1 border-b border-zinc-800 whitespace-nowrap">
+              Path
+            </span>
+            <button
+              onClick={() => revealItemInDir(recording.filePath)}
+              className="text-xs text-zinc-200 py-1.5 pl-2 border-b border-zinc-800 min-w-0 text-left truncate hover:text-white hover:underline cursor-pointer"
+              title={recording.filePath}
+            >
+              {recording.filePath}
+            </button>
             <MetaRow
               label="Format"
               value={recording.format?.toUpperCase() ?? null}
