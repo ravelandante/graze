@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { useStore } from "../store";
+import { useStore } from "@store";
 
 function MetaRow({
   label,

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Pencil, Trash } from "lucide-react";
-import { useStore } from "../store";
-import { useRecordingDropTargets } from "../hooks/useRecordingDropTargets";
+import { useStore } from "@store";
+import { useRecordingDropTargets } from "@hooks/useRecordingDropTargets";
 
 export function CollectionSidebar() {
   const collections = useStore((s) => s.collections);

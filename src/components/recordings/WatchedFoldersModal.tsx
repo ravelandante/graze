@@ -1,7 +1,7 @@
 import { FolderOpen, Trash2 } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Modal } from "./Modal";
-import { useStore } from "../store";
+import { Modal } from "@components/common/Modal";
+import { useStore } from "@store";
 
 interface Props {
   onClose: () => void;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronRight, Trash2 } from "lucide-react";
-import { useStore } from "../store";
+import { useStore } from "@store";
 
 interface Props {
   recordingId: number;

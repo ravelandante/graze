@@ -1,6 +1,6 @@
-import type { RecordingInsert } from "../lib/db";
-import type { ColumnFilter } from "../lib/filterColumns";
-import type { Collection, Recording } from "../types";
+import type { RecordingInsert } from "@lib/db";
+import type { ColumnFilter } from "@lib/filterColumns";
+import type { Collection, Recording } from "@types";
 
 export interface UiSlice {
   selectedRecordingId: number | null;

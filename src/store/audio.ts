@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { StateCreator } from "zustand";
-import { savePeaks } from "../lib/db";
-import type { Recording } from "../types";
+import { savePeaks } from "@lib/db";
+import type { Recording } from "@types";
 import type { AppState, AudioSlice } from "./types";
 
 export const createAudioSlice: StateCreator<AppState, [], [], AudioSlice> = (

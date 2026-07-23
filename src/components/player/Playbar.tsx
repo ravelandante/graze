@@ -7,14 +7,14 @@ import {
   Minus,
   Equal,
 } from "lucide-react";
-import { loadSetting, saveSetting } from "../lib/settings";
+import { loadSetting, saveSetting } from "@lib/settings";
 import { Waveform } from "./Waveform";
 import { Spectrogram } from "./Spectrogram";
 import { PlayControls } from "./PlayControls";
 import { TrimTab } from "./TrimTab";
 import { NormalizeTab } from "./NormalizeTab";
-import { useTrim } from "../hooks/useTrim";
-import { useStore } from "../store";
+import { useTrim } from "@hooks/useTrim";
+import { useStore } from "@store";
 
 interface Props {
   audioEl: HTMLAudioElement;

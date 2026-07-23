@@ -10,10 +10,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "./store";
 import { registerWatcherListeners } from "./lib/watcher";
 import { isFilterActive, matchesFilter } from "./lib/filterColumns";
-import { CollectionSidebar } from "./components/CollectionSidebar";
-import { RecordingList } from "./components/RecordingList";
-import { RecordingDetail } from "./components/RecordingDetail";
-import { Playbar } from "./components/Playbar";
+import { CollectionSidebar } from "@components/collections/CollectionSidebar";
+import { RecordingList } from "@components/recordings/RecordingList";
+import { RecordingDetail } from "@components/recordings/RecordingDetail";
+import { Playbar } from "@components/player/Playbar";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
 
 export default function App() {

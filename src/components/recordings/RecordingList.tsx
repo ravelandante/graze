@@ -4,13 +4,13 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { readDir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
-import { FilterMenu } from "./FilterMenu";
+import { FilterMenu } from "./filters/FilterMenu";
 import { ImportMenu } from "./ImportMenu";
-import type { Recording, RecordingColumnVisibility } from "../types";
+import type { Recording, RecordingColumnVisibility } from "@types";
 import { RecordingTableView } from "./RecordingTableView";
-import { loadSetting, saveSetting } from "../lib/settings";
-import { FILTER_COLUMNS } from "../lib/filterColumns";
-import { useStore } from "../store";
+import { loadSetting, saveSetting } from "@lib/settings";
+import { FILTER_COLUMNS } from "@lib/filterColumns";
+import { useStore } from "@store";
 
 interface Props {
   visibleRecordings: Recording[];

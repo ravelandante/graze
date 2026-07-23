@@ -1,5 +1,5 @@
 import Database from "@tauri-apps/plugin-sql";
-import type { Collection, Recording, RecordingStatus } from "../types";
+import type { Collection, Recording, RecordingStatus } from "@types";
 
 let db: Database | null = null;
 

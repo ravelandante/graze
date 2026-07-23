@@ -7,8 +7,8 @@ import {
   SkipForward,
   Square,
 } from "lucide-react";
-import type { Recording } from "../types";
-import { formatTime } from "../lib/format";
+import type { Recording } from "@types";
+import { formatTime } from "@lib/format";
 
 interface Props {
   recording: Recording | null;

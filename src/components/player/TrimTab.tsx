@@ -1,4 +1,4 @@
-import { formatTime } from "../lib/format";
+import { formatTime } from "@lib/format";
 
 interface Props {
   trimIn: number | null;

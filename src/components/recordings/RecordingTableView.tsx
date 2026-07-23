@@ -15,11 +15,11 @@ import {
   FileExclamationPoint,
 } from "lucide-react";
 import { useState } from "react";
-import type { Recording, RecordingColumnVisibility } from "../types";
-import { formatTime } from "../lib/format";
-import { useStore } from "../store";
+import type { Recording, RecordingColumnVisibility } from "@types";
+import { formatTime } from "@lib/format";
+import { useStore } from "@store";
 import { RecordingContextMenu } from "./RecordingContextMenu";
-import { useRecordingSelection } from "../hooks/useRecordingSelection";
+import { useRecordingSelection } from "@hooks/useRecordingSelection";
 
 interface Props {
   recordings: Recording[];

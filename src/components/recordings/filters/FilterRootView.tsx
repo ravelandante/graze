@@ -1,5 +1,5 @@
-import type { RecordingColumn } from "../types";
-import { FILTER_COLUMNS } from "../lib/filterColumns";
+import type { RecordingColumn } from "@types";
+import { FILTER_COLUMNS } from "@lib/filterColumns";
 import { FilterRootRow } from "./FilterRootRow";
 
 export function FilterRootView({

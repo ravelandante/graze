@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import type { Recording } from "../types";
-import { loadSetting, saveSetting } from "../lib/settings";
-import { useStore } from "../store";
+import type { Recording } from "@types";
+import { loadSetting, saveSetting } from "@lib/settings";
+import { useStore } from "@store";
 
 export function useAudioPlayer(recordings: Recording[]) {
   const selectedId = useStore((s) => s.selectedRecordingId);

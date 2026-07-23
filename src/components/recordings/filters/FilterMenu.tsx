@@ -1,13 +1,13 @@
 import { ListFilterPlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useStore } from "../store";
-import type { RecordingColumn } from "../types";
+import { useStore } from "@store";
+import type { RecordingColumn } from "@types";
 import {
   describeFilter,
   getColumnConfig,
   newFilter,
   type ColumnFilter,
-} from "../lib/filterColumns";
+} from "@lib/filterColumns";
 import { FilterRootView } from "./FilterRootView";
 import { FilterCollectionView } from "./FilterCollectionView";
 import { FilterColumnView } from "./FilterColumnView";

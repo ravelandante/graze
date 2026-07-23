@@ -1,4 +1,4 @@
-import type { Recording, RecordingColumn } from "../types";
+import type { Recording, RecordingColumn } from "@types";
 
 export type FilterType = "text" | "number" | "duration" | "date" | "select";
 

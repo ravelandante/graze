@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { Recording } from "../types";
-import { useStore } from "../store";
+import type { Recording } from "@types";
+import { useStore } from "@store";
 
 export const RECORDING_DRAG_TYPE = "application/graze-recordings";
 

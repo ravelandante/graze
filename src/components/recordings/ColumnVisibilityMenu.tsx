@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Columns3 } from "lucide-react";
-import type { RecordingColumn, RecordingColumnVisibility } from "../types";
+import type { RecordingColumn, RecordingColumnVisibility } from "@types";
 
 interface ColumnDef {
   id: RecordingColumn;

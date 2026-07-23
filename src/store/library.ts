@@ -19,9 +19,9 @@ import {
   setRecordingsStatusByPath,
   updateRecording,
   type RecordingInsert,
-} from "../lib/db";
-import { extractMetadata } from "../lib/metadata";
-import { normalizeFile, trimFile, writeFileMetadata } from "../lib/audio";
+} from "@lib/db";
+import { extractMetadata } from "@lib/metadata";
+import { normalizeFile, trimFile, writeFileMetadata } from "@lib/audio";
 import type { AppState, LibrarySlice } from "./types";
 
 function invertMemberships(

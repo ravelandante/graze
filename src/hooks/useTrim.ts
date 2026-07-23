@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import RegionsPlugin from "wavesurfer.js/plugins/regions";
 import type { Region } from "wavesurfer.js/plugins/regions";
-import type { Recording } from "../types";
+import type { Recording } from "@types";
 
 export function useTrim(
   audioEl: HTMLAudioElement,

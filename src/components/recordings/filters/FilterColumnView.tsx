@@ -6,7 +6,7 @@ import {
   maskDuration,
   type ColumnFilter,
   type FilterOperator,
-} from "../lib/filterColumns";
+} from "@lib/filterColumns";
 import { FilterBackButton } from "./FilterBackButton";
 
 export function FilterColumnView({
