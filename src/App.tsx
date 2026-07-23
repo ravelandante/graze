@@ -9,6 +9,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "./store";
 import { registerWatcherListeners } from "./lib/watcher";
+import { isFilterActive, matchesFilter } from "./lib/filterColumns";
 import { CollectionSidebar } from "./components/CollectionSidebar";
 import { RecordingList } from "./components/RecordingList";
 import { RecordingDetail } from "./components/RecordingDetail";
@@ -19,6 +20,7 @@ export default function App() {
   const recordings = useStore((s) => s.recordings);
   const memberships = useStore((s) => s.memberships);
   const filterCollectionIds = useStore((s) => s.filterCollectionIds);
+  const columnFilters = useStore((s) => s.columnFilters);
   const searchQuery = useStore((s) => s.searchQuery);
   const selectedRecordingId = useStore((s) => s.selectedRecordingId);
   const status = useStore((s) => s.status);
@@ -52,12 +54,16 @@ export default function App() {
 
   const visibleRecordings = useMemo(() => {
     const q = searchQuery.toLowerCase();
+    const activeFilters = columnFilters.filter(isFilterActive);
     return recordings.filter((r) => {
       if (filterCollectionIds.size > 0) {
         const inAny = [...filterCollectionIds].some((cid) =>
           memberships.get(cid)?.has(r.id),
         );
         if (!inAny) return false;
+      }
+      for (const f of activeFilters) {
+        if (!matchesFilter(r, f)) return false;
       }
       if (!q) return true;
       return (
@@ -67,7 +73,13 @@ export default function App() {
         r.originator?.toLowerCase().includes(q)
       );
     });
-  }, [recordings, memberships, filterCollectionIds, searchQuery]);
+  }, [
+    recordings,
+    memberships,
+    filterCollectionIds,
+    columnFilters,
+    searchQuery,
+  ]);
 
   const {
     isPlaying,

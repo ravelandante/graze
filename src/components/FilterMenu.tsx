@@ -1,31 +1,49 @@
-import { Check, ChevronRight, ListFilterPlus, X } from "lucide-react";
+import { ListFilterPlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore } from "../store";
+import type { RecordingColumn } from "../types";
+import {
+  describeFilter,
+  getColumnConfig,
+  newFilter,
+  type ColumnFilter,
+} from "../lib/filterColumns";
+import { FilterRootView } from "./FilterRootView";
+import { FilterCollectionView } from "./FilterCollectionView";
+import { FilterColumnView } from "./FilterColumnView";
 
-type FilterView = "root" | "collection";
+type FilterView =
+  | { kind: "root" }
+  | { kind: "collection" }
+  | { kind: "column"; column: RecordingColumn };
 
 export function FilterMenu() {
   const collections = useStore((s) => s.collections);
   const filterCollectionIds = useStore((s) => s.filterCollectionIds);
   const setFilterCollectionIds = useStore((s) => s.setFilterCollectionIds);
+  const columnFilters = useStore((s) => s.columnFilters);
+  const setColumnFilters = useStore((s) => s.setColumnFilters);
+  const clearAllFilters = useStore((s) => s.clearAllFilters);
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<FilterView>("root");
+  const [view, setView] = useState<FilterView>({ kind: "root" });
 
-  const activeCount = filterCollectionIds.size;
-  const chipLabel =
-    activeCount === 1
+  const collectionCount = filterCollectionIds.size;
+  const collectionChipLabel =
+    collectionCount === 1
       ? (collections.find((c) => c.id === [...filterCollectionIds][0])?.name ??
         "")
-      : activeCount > 1
-        ? `${activeCount} collections`
+      : collectionCount > 1
+        ? `${collectionCount} collections`
         : null;
+
+  const hasAnyFilter = collectionCount > 0 || columnFilters.length > 0;
 
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        if (view === "collection") setView("root");
+        if (view.kind !== "root") setView({ kind: "root" });
         else setOpen(false);
       }
     }
@@ -36,7 +54,7 @@ export function FilterMenu() {
   function handleOpenToggle() {
     if (open) {
       setOpen(false);
-      setView("root");
+      setView({ kind: "root" });
     } else {
       setOpen(true);
     }
@@ -44,7 +62,7 @@ export function FilterMenu() {
 
   function handleClose() {
     setOpen(false);
-    setView("root");
+    setView({ kind: "root" });
   }
 
   function toggleCollection(id: number) {
@@ -54,8 +72,38 @@ export function FilterMenu() {
     setFilterCollectionIds(next);
   }
 
+  function getFilter(column: RecordingColumn) {
+    return columnFilters.find((f) => f.column === column);
+  }
+
+  function upsertFilter(next: ColumnFilter) {
+    const exists = columnFilters.some((f) => f.column === next.column);
+    setColumnFilters(
+      exists
+        ? columnFilters.map((f) => (f.column === next.column ? next : f))
+        : [...columnFilters, next],
+    );
+  }
+
+  function removeFilter(column: RecordingColumn) {
+    setColumnFilters(columnFilters.filter((f) => f.column !== column));
+    if (view.kind === "column" && view.column === column) handleClose();
+  }
+
+  function openColumn(column: RecordingColumn) {
+    if (getColumnConfig(column) && !getFilter(column)) {
+      upsertFilter(newFilter(column));
+    }
+    setView({ kind: "column", column });
+  }
+
+  function editChip(column: RecordingColumn) {
+    setOpen(true);
+    setView({ kind: "column", column });
+  }
+
   return (
-    <div className="relative flex items-center gap-1">
+    <div className="relative flex items-center gap-1 flex-wrap">
       <button
         onClick={handleOpenToggle}
         className={`p-1 rounded ${open ? "text-zinc-300" : "text-zinc-600 hover:text-zinc-400"}`}
@@ -64,9 +112,17 @@ export function FilterMenu() {
         <ListFilterPlus size={14} strokeWidth={1.5} />
       </button>
 
-      {chipLabel && (
-        <span className="flex items-center gap-1 text-xs bg-zinc-700 text-zinc-300 rounded px-1.5 py-0.5">
-          {chipLabel}
+      {collectionChipLabel && (
+        <span className="relative z-30 flex items-center gap-1 text-xs bg-zinc-700 text-zinc-300 rounded px-1.5 py-0.5">
+          <button
+            onClick={() => {
+              setOpen(true);
+              setView({ kind: "collection" });
+            }}
+            className="hover:text-white"
+          >
+            {collectionChipLabel}
+          </button>
           <button
             onClick={() => setFilterCollectionIds(new Set())}
             className="text-zinc-500 hover:text-zinc-200"
@@ -77,63 +133,60 @@ export function FilterMenu() {
         </span>
       )}
 
+      {columnFilters.map((f) => (
+        <span
+          key={f.column}
+          className="relative z-30 flex items-center gap-1 text-xs bg-zinc-700 text-zinc-300 rounded px-1.5 py-0.5"
+        >
+          <button
+            onClick={() => editChip(f.column)}
+            className="hover:text-white"
+          >
+            {describeFilter(f)}
+          </button>
+          <button
+            onClick={() => removeFilter(f.column)}
+            className="text-zinc-500 hover:text-zinc-200"
+            title="Remove filter"
+          >
+            <X size={10} strokeWidth={2} />
+          </button>
+        </span>
+      ))}
+
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={handleClose} />
-          <div className="absolute left-0 top-full mt-1 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl py-1 min-w-44">
-            {view === "root" ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setView("collection");
+          <div className="absolute left-0 top-full mt-1 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl py-1 min-w-52">
+            {view.kind === "root" && (
+              <FilterRootView
+                filteredColumns={new Set(columnFilters.map((f) => f.column))}
+                collectionActive={collectionCount > 0}
+                hasAnyFilter={hasAnyFilter}
+                onPickCollection={() => setView({ kind: "collection" })}
+                onPickColumn={openColumn}
+                onClearAll={() => {
+                  clearAllFilters();
+                  handleClose();
                 }}
-                className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
-              >
-                <span>Collection</span>
-                <ChevronRight
-                  size={12}
-                  strokeWidth={1.5}
-                  className="shrink-0 text-zinc-500"
-                />
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setView("root");
-                  }}
-                  className="w-full text-left px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1.5"
-                >
-                  ← Collection
-                </button>
-                <div className="border-t border-zinc-700 mx-1 mb-1" />
-                {collections.length === 0 ? (
-                  <p className="px-2.5 py-1 text-xs text-zinc-500">
-                    No collections yet
-                  </p>
-                ) : (
-                  collections.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCollection(c.id);
-                      }}
-                      className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
-                    >
-                      <span className="truncate">{c.name}</span>
-                      {filterCollectionIds.has(c.id) && (
-                        <Check
-                          size={12}
-                          strokeWidth={2}
-                          className="shrink-0 text-zinc-400"
-                        />
-                      )}
-                    </button>
-                  ))
-                )}
-              </>
+              />
+            )}
+
+            {view.kind === "collection" && (
+              <FilterCollectionView
+                collections={collections}
+                selectedIds={filterCollectionIds}
+                onBack={() => setView({ kind: "root" })}
+                onToggle={toggleCollection}
+              />
+            )}
+
+            {view.kind === "column" && (
+              <FilterColumnView
+                filter={getFilter(view.column) ?? newFilter(view.column)}
+                onBack={() => setView({ kind: "root" })}
+                onChange={upsertFilter}
+              />
             )}
           </div>
         </>

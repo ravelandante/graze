@@ -1,16 +1,20 @@
 import type { RecordingInsert } from "../lib/db";
+import type { ColumnFilter } from "../lib/filterColumns";
 import type { Collection, Recording } from "../types";
 
 export interface UiSlice {
   selectedRecordingId: number | null;
   selectedIds: Set<number>;
   filterCollectionIds: Set<number>;
+  columnFilters: ColumnFilter[];
   searchQuery: string;
   status: string | null;
 
   setSelectedRecordingId: (id: number | null) => void;
   setSelectedIds: (ids: Set<number>) => void;
   setFilterCollectionIds: (ids: Set<number>) => void;
+  setColumnFilters: (filters: ColumnFilter[]) => void;
+  clearAllFilters: () => void;
   setSearchQuery: (q: string) => void;
   setStatus: (s: string | null) => void;
 }
