@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import { MENU_ITEM_MUTED } from "@components/common/menu";
 
 export function FilterBackButton({
   label,
@@ -13,7 +14,7 @@ export function FilterBackButton({
         e.stopPropagation();
         onBack();
       }}
-      className="w-full text-left px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-700 flex items-center gap-1"
+      className={`${MENU_ITEM_MUTED} flex items-center gap-1`}
     >
       <ChevronLeft size={12} strokeWidth={1.5} />
       {label}

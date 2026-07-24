@@ -7,6 +7,7 @@ import {
   type ColumnFilter,
   type FilterOperator,
 } from "@lib/filterColumns";
+import { MenuSeparator } from "@components/common/menu";
 import { FilterBackButton } from "./FilterBackButton";
 
 export function FilterColumnView({
@@ -37,7 +38,7 @@ export function FilterColumnView({
   return (
     <>
       <FilterBackButton label={col.label} onBack={onBack} />
-      <div className="border-t border-zinc-700 mx-1 mb-1" />
+      <MenuSeparator />
       <div className="px-2.5 py-1 flex flex-col gap-1.5">
         <select
           value={filter.operator}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { MENU_ITEM, MENU_PANEL, MenuSeparator } from "@components/common/menu";
 
 interface Props {
   onImport: () => void;
@@ -28,13 +29,15 @@ export function ImportMenu({
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded shadow-xl min-w-35 z-30">
+          <div
+            className={`${MENU_PANEL} absolute right-0 top-full mt-1 min-w-35 z-30`}
+          >
             <button
               onClick={() => {
                 setOpen(false);
                 onImport();
               }}
-              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
+              className={MENU_ITEM}
             >
               Import files
             </button>
@@ -43,7 +46,7 @@ export function ImportMenu({
                 setOpen(false);
                 onImportFolder();
               }}
-              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
+              className={MENU_ITEM}
             >
               Import folder
             </button>
@@ -52,17 +55,17 @@ export function ImportMenu({
                 setOpen(false);
                 onWatchFolder();
               }}
-              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
+              className={MENU_ITEM}
             >
               Watch folder
             </button>
-            <hr className="border-zinc-700" />
+            <MenuSeparator />
             <button
               onClick={() => {
                 setOpen(false);
                 onManageWatchedFolders();
               }}
-              className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700"
+              className={MENU_ITEM}
             >
               Manage watched folders
             </button>

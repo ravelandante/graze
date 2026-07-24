@@ -1,4 +1,5 @@
 import { Check, ChevronRight } from "lucide-react";
+import { MENU_ITEM } from "@components/common/menu";
 
 export function FilterRootRow({
   label,
@@ -15,7 +16,7 @@ export function FilterRootRow({
         e.stopPropagation();
         onClick();
       }}
-      className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+      className={`${MENU_ITEM} flex items-center justify-between gap-3`}
     >
       <span className="truncate">{label}</span>
       {active ? (

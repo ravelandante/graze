@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { MENU_ITEM, MenuSeparator } from "@components/common/menu";
 import { FilterBackButton } from "./FilterBackButton";
 
 export function FilterCollectionView({
@@ -15,7 +16,7 @@ export function FilterCollectionView({
   return (
     <>
       <FilterBackButton label="Collection" onBack={onBack} />
-      <div className="border-t border-zinc-700 mx-1 mb-1" />
+      <MenuSeparator />
       {collections.length === 0 ? (
         <p className="px-2.5 py-1 text-xs text-zinc-500">No collections yet</p>
       ) : (
@@ -26,7 +27,7 @@ export function FilterCollectionView({
               e.stopPropagation();
               onToggle(c.id);
             }}
-            className="w-full text-left px-2.5 py-1 text-sm text-zinc-200 hover:bg-zinc-700 flex items-center justify-between gap-3"
+            className={`${MENU_ITEM} flex items-center justify-between gap-3`}
           >
             <span className="truncate">{c.name}</span>
             {selectedIds.has(c.id) && (

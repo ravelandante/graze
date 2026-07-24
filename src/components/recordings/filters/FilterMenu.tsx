@@ -8,6 +8,7 @@ import {
   newFilter,
   type ColumnFilter,
 } from "@lib/filterColumns";
+import { MENU_PANEL } from "@components/common/menu";
 import { FilterRootView } from "./FilterRootView";
 import { FilterCollectionView } from "./FilterCollectionView";
 import { FilterColumnView } from "./FilterColumnView";
@@ -162,7 +163,9 @@ export function FilterMenu() {
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={handleClose} />
-          <div className="absolute left-0 top-full mt-1 z-50 bg-zinc-800 border border-zinc-700 rounded shadow-xl py-1 min-w-52">
+          <div
+            className={`${MENU_PANEL} absolute left-0 top-full mt-1 z-50 min-w-52`}
+          >
             {view.kind === "root" && (
               <FilterRootView
                 filteredColumns={new Set(columnFilters.map((f) => f.column))}
