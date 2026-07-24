@@ -4,7 +4,7 @@ import { useStore } from "@store";
 import type { RecordingColumn } from "@types";
 import {
   describeFilter,
-  getColumnConfig,
+  isFilterActive,
   newFilter,
   type ColumnFilter,
 } from "@lib/filterColumns";
@@ -27,6 +27,7 @@ export function FilterMenu() {
 
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<FilterView>({ kind: "root" });
+  const [draft, setDraft] = useState<ColumnFilter | null>(null);
 
   const collectionCount = filterCollectionIds.size;
   const collectionChipLabel =
@@ -76,13 +77,18 @@ export function FilterMenu() {
     return columnFilters.find((f) => f.column === column);
   }
 
-  function upsertFilter(next: ColumnFilter) {
+  function commitDraft(next: ColumnFilter) {
+    setDraft(next);
     const exists = columnFilters.some((f) => f.column === next.column);
-    setColumnFilters(
-      exists
-        ? columnFilters.map((f) => (f.column === next.column ? next : f))
-        : [...columnFilters, next],
-    );
+    if (isFilterActive(next)) {
+      setColumnFilters(
+        exists
+          ? columnFilters.map((f) => (f.column === next.column ? next : f))
+          : [...columnFilters, next],
+      );
+    } else if (exists) {
+      setColumnFilters(columnFilters.filter((f) => f.column !== next.column));
+    }
   }
 
   function removeFilter(column: RecordingColumn) {
@@ -91,14 +97,13 @@ export function FilterMenu() {
   }
 
   function openColumn(column: RecordingColumn) {
-    if (getColumnConfig(column) && !getFilter(column)) {
-      upsertFilter(newFilter(column));
-    }
+    setDraft(getFilter(column) ?? newFilter(column));
     setView({ kind: "column", column });
   }
 
   function editChip(column: RecordingColumn) {
     setOpen(true);
+    setDraft(getFilter(column) ?? newFilter(column));
     setView({ kind: "column", column });
   }
 
@@ -183,9 +188,9 @@ export function FilterMenu() {
 
             {view.kind === "column" && (
               <FilterColumnView
-                filter={getFilter(view.column) ?? newFilter(view.column)}
+                filter={draft ?? newFilter(view.column)}
                 onBack={() => setView({ kind: "root" })}
-                onChange={upsertFilter}
+                onChange={commitDraft}
               />
             )}
           </div>
