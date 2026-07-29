@@ -76,6 +76,15 @@ async function migrate(db: Database) {
   `);
 
   await db.execute(`
+    CREATE TABLE IF NOT EXISTS recording_edits (
+      recording_id INTEGER PRIMARY KEY
+        REFERENCES recordings(id) ON DELETE CASCADE,
+      trim_start REAL,
+      trim_end   REAL
+    )
+  `);
+
+  await db.execute(`
     CREATE VIRTUAL TABLE IF NOT EXISTS recordings_fts
     USING fts5(title, artist, comment, originator, file_name, content=recordings, content_rowid=id)
   `);
@@ -96,12 +105,33 @@ export async function fetchRecordings(): Promise<Recording[]> {
       sample_rate           as sampleRate,
       bit_depth             as bitDepth,
       file_size_bytes       as fileSizeBytes,
-      imported_at           as importedAt
-    FROM recordings ORDER BY imported_at DESC
+      imported_at           as importedAt,
+      e.trim_start          as trimStart,
+      e.trim_end            as trimEnd
+    FROM recordings
+    LEFT JOIN recording_edits e ON e.recording_id = recordings.id
+    ORDER BY imported_at DESC
   `);
 }
 
-export type RecordingInsert = Omit<Recording, "id" | "importedAt" | "status">;
+export type RecordingInsert = Omit<
+  Recording,
+  "id" | "importedAt" | "status" | "trimStart" | "trimEnd"
+>;
+
+export async function upsertRecordingEdits(
+  recordingId: number,
+  edits: { trimStart: number | null; trimEnd: number | null },
+): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    `INSERT INTO recording_edits (recording_id, trim_start, trim_end)
+     VALUES (?, ?, ?)
+     ON CONFLICT(recording_id) DO UPDATE
+       SET trim_start = excluded.trim_start, trim_end = excluded.trim_end`,
+    [recordingId, edits.trimStart, edits.trimEnd],
+  );
+}
 
 export async function insertRecording(r: RecordingInsert): Promise<void> {
   const d = await getDb();

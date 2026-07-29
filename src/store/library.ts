@@ -18,6 +18,7 @@ import {
   setRecordingsStatus,
   setRecordingsStatusByPath,
   updateRecording,
+  upsertRecordingEdits,
   type RecordingInsert,
 } from "@lib/db";
 import { extractMetadata } from "@lib/metadata";
@@ -298,5 +299,14 @@ export const createLibrarySlice: StateCreator<
       set({ status: "Trim failed: " + String(err) });
     }
     setTimeout(() => set({ status: null }), 4000);
+  },
+
+  setTrimMarkers: async (recordingId, trimStart, trimEnd) => {
+    set({
+      recordings: get().recordings.map((r) =>
+        r.id === recordingId ? { ...r, trimStart, trimEnd } : r,
+      ),
+    });
+    await upsertRecordingEdits(recordingId, { trimStart, trimEnd });
   },
 });

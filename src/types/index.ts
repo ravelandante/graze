@@ -22,6 +22,8 @@ export interface Recording {
   fileSizeBytes: number | null;
   importedAt: string;
   status: RecordingStatus;
+  trimStart: number | null; // seconds
+  trimEnd: number | null; // seconds
 }
 
 export type RecordingColumn = keyof Recording;

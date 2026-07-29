@@ -51,6 +51,11 @@ export interface LibrarySlice {
   saveRecording: (updates: Partial<Recording>) => Promise<void>;
   normalizeRecording: () => Promise<void>;
   trimRecording: (start: number, end: number) => Promise<void>;
+  setTrimMarkers: (
+    recordingId: number,
+    trimStart: number | null,
+    trimEnd: number | null,
+  ) => Promise<void>;
 }
 
 export interface AudioSlice {
