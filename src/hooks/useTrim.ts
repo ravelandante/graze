@@ -3,6 +3,7 @@ import WaveSurfer from "wavesurfer.js";
 import RegionsPlugin from "wavesurfer.js/plugins/regions";
 import type { Region } from "wavesurfer.js/plugins/regions";
 import type { Recording } from "@types";
+import { useStore } from "@store";
 
 export function useTrim(
   audioEl: HTMLAudioElement,
@@ -10,6 +11,8 @@ export function useTrim(
   expanded: boolean,
   onTrim?: (start: number, end: number) => void,
 ) {
+  const setTrimMarkers = useStore((s) => s.setTrimMarkers);
+
   const [trimIn, setTrimIn] = useState<number | null>(null);
   const [trimOut, setTrimOut] = useState<number | null>(null);
 
@@ -18,23 +21,41 @@ export function useTrim(
   const regionsRef = useRef<RegionsPlugin | null>(null);
   const regionRef = useRef<Region | null>(null);
 
-  useEffect(() => {
-    if (!expanded) {
-      regionRef.current?.remove();
-      regionRef.current = null;
+  function persist() {
+    if (!recording) return;
+    const trimIn = trimInRef.current;
+    const trimOut = trimOutRef.current;
+    if (trimIn === null || trimOut === null) {
+      void setTrimMarkers(recording.id, null, null);
     } else {
-      updateRegion();
+      void setTrimMarkers(
+        recording.id,
+        Math.min(trimIn, trimOut),
+        Math.max(trimIn, trimOut),
+      );
+    }
+  }
+
+  useEffect(() => {
+    const inPt = trimInRef.current;
+    const outPt = trimOutRef.current;
+    regionRef.current?.remove();
+    regionRef.current = null;
+    if (regionsRef.current && inPt !== null && outPt !== null) {
+      regionRef.current = addRegion(regionsRef.current, inPt, outPt);
     }
   }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    trimInRef.current = null;
-    trimOutRef.current = null;
-    setTrimIn(null);
-    setTrimOut(null);
+    const inPt = recording?.trimStart ?? null;
+    const outPt = recording?.trimEnd ?? null;
+    trimInRef.current = inPt;
+    trimOutRef.current = outPt;
+    setTrimIn(inPt);
+    setTrimOut(outPt);
     regionRef.current = null;
     regionsRef.current = null;
-  }, [recording?.filePath]);
+  }, [recording?.filePath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function attachRegionListeners(region: Region) {
     region.on("update-end", () => {
@@ -42,6 +63,7 @@ export function useTrim(
       trimOutRef.current = region.end;
       setTrimIn(region.start);
       setTrimOut(region.end);
+      persist();
     });
   }
 
@@ -54,8 +76,8 @@ export function useTrim(
       start: Math.min(inPt, outPt),
       end: Math.max(inPt, outPt),
       color: "rgba(161, 161, 170, 0.18)",
-      drag: true,
-      resize: true,
+      drag: expanded,
+      resize: expanded,
     });
     attachRegionListeners(region);
     return region;
@@ -85,7 +107,6 @@ export function useTrim(
     regionRef.current = null;
     const regions = ws.registerPlugin(RegionsPlugin.create());
     regionsRef.current = regions;
-    if (!expanded) return;
     const inPt = trimInRef.current;
     const outPt = trimOutRef.current;
     if (inPt !== null && outPt !== null) {
@@ -102,6 +123,7 @@ export function useTrim(
       setTrimOut(end);
     }
     updateRegion();
+    persist();
   }
 
   function handleSetOut() {
@@ -112,6 +134,7 @@ export function useTrim(
       setTrimIn(0);
     }
     updateRegion();
+    persist();
   }
 
   function handleTrimApply() {
@@ -129,6 +152,7 @@ export function useTrim(
     trimOutRef.current = null;
     setTrimIn(null);
     setTrimOut(null);
+    persist();
   }
 
   return {
