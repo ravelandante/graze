@@ -86,10 +86,9 @@ async function migrate(db: Database) {
     )
   `);
 
-  await db.execute(`
-    CREATE VIRTUAL TABLE IF NOT EXISTS recordings_fts
-    USING fts5(title, artist, comment, originator, file_name, content=recordings, content_rowid=id)
-  `);
+  // recordings_fts was created here historically but never populated or
+  // queried (search filters in JS), so clean it out of existing databases.
+  await db.execute("DROP TABLE IF EXISTS recordings_fts");
 }
 
 export async function fetchRecordings(): Promise<Recording[]> {
