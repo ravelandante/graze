@@ -11,23 +11,6 @@ async function getDb(): Promise<Database> {
 }
 
 async function migrate(db: Database) {
-  const cols = await db.select<{ name: string }[]>(
-    "PRAGMA table_info(recordings)",
-  );
-  if (!cols.some((c) => c.name === "peaks")) {
-    await db.execute("ALTER TABLE recordings ADD COLUMN peaks TEXT");
-  }
-  if (!cols.some((c) => c.name === "status")) {
-    await db.execute(
-      "ALTER TABLE recordings ADD COLUMN status TEXT NOT NULL DEFAULT 'present'",
-    );
-    if (cols.some((c) => c.name === "missing")) {
-      await db.execute(
-        "UPDATE recordings SET status = 'missing' WHERE missing = 1",
-      );
-    }
-  }
-
   await db.execute(`
     CREATE TABLE IF NOT EXISTS recordings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,10 +30,29 @@ async function migrate(db: Database) {
       channels INTEGER,
       format TEXT,
       file_size_bytes INTEGER,
+      peaks TEXT,
       status TEXT NOT NULL DEFAULT 'present',
       imported_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  // Column back-fills for databases created before peaks/status existed.
+  const cols = await db.select<{ name: string }[]>(
+    "PRAGMA table_info(recordings)",
+  );
+  if (!cols.some((c) => c.name === "peaks")) {
+    await db.execute("ALTER TABLE recordings ADD COLUMN peaks TEXT");
+  }
+  if (!cols.some((c) => c.name === "status")) {
+    await db.execute(
+      "ALTER TABLE recordings ADD COLUMN status TEXT NOT NULL DEFAULT 'present'",
+    );
+    if (cols.some((c) => c.name === "missing")) {
+      await db.execute(
+        "UPDATE recordings SET status = 'missing' WHERE missing = 1",
+      );
+    }
+  }
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS watched_folders (
