@@ -11,7 +11,7 @@ import {
   fetchWatchedFolders,
   insertWatchedFolder,
   deleteWatchedFolder,
-  getExistingPeaks,
+  fetchPeaksIds,
   fetchRecordings,
   insertCollection,
   insertRecording,
@@ -51,18 +51,18 @@ export const createLibrarySlice: StateCreator<
   recordingMemberships: new Map(),
 
   loadAll: async () => {
-    const [recordings, collections, memberships, peaksMap] = await Promise.all([
+    const [recordings, collections, memberships, hasPeaks] = await Promise.all([
       fetchRecordings(),
       fetchCollections(),
       fetchMemberships(),
-      getExistingPeaks(),
+      fetchPeaksIds(),
     ]);
     set({
       recordings,
       collections,
       memberships,
       recordingMemberships: invertMemberships(memberships),
-      peaksMap,
+      hasPeaks,
     });
   },
 

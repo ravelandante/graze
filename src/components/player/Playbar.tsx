@@ -52,9 +52,14 @@ export function Playbar({
   );
   const peaks = useStore((s) =>
     s.selectedRecordingId != null
-      ? (s.peaksMap.get(s.selectedRecordingId) ?? undefined)
+      ? (s.peaksCache.get(s.selectedRecordingId) ?? undefined)
       : undefined,
   );
+  const loadPeaks = useStore((s) => s.loadPeaks);
+  const selectedId = recording?.id ?? null;
+  useEffect(() => {
+    if (selectedId != null) void loadPeaks(selectedId);
+  }, [selectedId, loadPeaks]);
   const normalizeRecording = useStore((s) => s.normalizeRecording);
   const trimRecording = useStore((s) => s.trimRecording);
   const [expanded, setExpanded] = useState(false);

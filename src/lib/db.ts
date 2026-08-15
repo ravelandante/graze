@@ -222,20 +222,26 @@ export async function addRecordingToCollection(
   );
 }
 
-export async function getExistingPeaks(): Promise<Map<number, number[][]>> {
+export async function fetchPeaksIds(): Promise<Set<number>> {
   const d = await getDb();
-  const rows = await d.select<{ id: number; peaks: string }[]>(
-    "SELECT id, peaks FROM recordings WHERE peaks IS NOT NULL",
+  const rows = await d.select<{ id: number }[]>(
+    "SELECT id FROM recordings WHERE peaks IS NOT NULL",
   );
-  const map = new Map<number, number[][]>();
-  for (const { id, peaks } of rows) {
-    try {
-      map.set(id, JSON.parse(peaks));
-    } catch {
-      // skip rows with malformed peaks JSON
-    }
+  return new Set(rows.map((r) => r.id));
+}
+
+export async function fetchPeaks(id: number): Promise<number[][] | null> {
+  const d = await getDb();
+  const rows = await d.select<{ peaks: string }[]>(
+    "SELECT peaks FROM recordings WHERE id = ? AND peaks IS NOT NULL",
+    [id],
+  );
+  if (rows.length === 0) return null;
+  try {
+    return JSON.parse(rows[0].peaks) as number[][];
+  } catch {
+    return null; // malformed peaks JSON — treat as absent so it gets recomputed
   }
-  return map;
 }
 
 export async function savePeaks(id: number, peaks: number[][]): Promise<void> {

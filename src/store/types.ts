@@ -59,8 +59,10 @@ export interface LibrarySlice {
 }
 
 export interface AudioSlice {
-  // recordingId → peaks (one float array per channel)
-  peaksMap: Map<number, number[][]>;
+  // ids of recordings that have peaks stored in the DB
+  hasPeaks: Set<number>;
+  peaksCache: Map<number, number[][]>;
+  loadPeaks: (id: number) => Promise<void>;
   startPeakComputation: (targets?: Recording[]) => void;
 }
 
