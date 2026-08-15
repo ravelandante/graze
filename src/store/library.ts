@@ -38,6 +38,38 @@ function invertMemberships(
   return result;
 }
 
+function withMembership(
+  state: Pick<AppState, "memberships" | "recordingMemberships">,
+  recordingIds: Iterable<number>,
+  collectionId: number,
+  member: boolean,
+): Pick<AppState, "memberships" | "recordingMemberships"> {
+  const memberships = new Map(state.memberships);
+  const recordingMemberships = new Map(state.recordingMemberships);
+  const collectionSet = new Set(memberships.get(collectionId));
+  for (const recordingId of recordingIds) {
+    const recordingSet = new Set(recordingMemberships.get(recordingId));
+    if (member) {
+      collectionSet.add(recordingId);
+      recordingSet.add(collectionId);
+    } else {
+      collectionSet.delete(recordingId);
+      recordingSet.delete(collectionId);
+    }
+    if (recordingSet.size > 0) {
+      recordingMemberships.set(recordingId, recordingSet);
+    } else {
+      recordingMemberships.delete(recordingId);
+    }
+  }
+  if (collectionSet.size > 0) {
+    memberships.set(collectionId, collectionSet);
+  } else {
+    memberships.delete(collectionId);
+  }
+  return { memberships, recordingMemberships };
+}
+
 export const createLibrarySlice: StateCreator<
   AppState,
   [],
@@ -168,12 +200,12 @@ export const createLibrarySlice: StateCreator<
 
   createCollection: async (name) => {
     await insertCollection(name);
-    await get().loadAll();
+    set({ collections: await fetchCollections() });
   },
 
   renameCollection: async (id, name) => {
     await dbRenameCollection(id, name);
-    await get().loadAll();
+    set({ collections: await fetchCollections() });
   },
 
   deleteCollection: async (id) => {
@@ -184,18 +216,54 @@ export const createLibrarySlice: StateCreator<
       set({ filterCollectionIds: next });
     }
     await dbDeleteCollection(id);
-    await get().loadAll();
+    const { collections, memberships, recordingMemberships } = get();
+    const members = memberships.get(id) ?? new Set<number>();
+    set({
+      collections: collections.filter((c) => c.id !== id),
+      ...withMembership(
+        { memberships, recordingMemberships },
+        members,
+        id,
+        false,
+      ),
+    });
   },
 
   removeRecording: async (ids) => {
     for (const id of ids) await dbDeleteRecording(id);
-    const { selectedRecordingId, peaksMap, selectedIds } = get();
+    const {
+      selectedRecordingId,
+      hasPeaks,
+      peaksCache,
+      selectedIds,
+      memberships,
+      recordingMemberships,
+    } = get();
     const idSet = new Set(ids);
-    const nextPeaksMap = new Map(peaksMap);
-    for (const id of ids) nextPeaksMap.delete(id);
+    const nextHasPeaks = new Set(hasPeaks);
+    const nextPeaksCache = new Map(peaksCache);
+    for (const id of ids) {
+      nextHasPeaks.delete(id);
+      nextPeaksCache.delete(id);
+    }
+    // Strip deleted recordings from both membership maps (the DB rows are
+    // gone via ON DELETE CASCADE).
+    const nextMemberships = new Map(memberships);
+    for (const [collectionId, recordingIds] of nextMemberships) {
+      if (![...idSet].some((id) => recordingIds.has(id))) continue;
+      const nextSet = new Set(recordingIds);
+      for (const id of idSet) nextSet.delete(id);
+      if (nextSet.size > 0) nextMemberships.set(collectionId, nextSet);
+      else nextMemberships.delete(collectionId);
+    }
+    const nextRecordingMemberships = new Map(recordingMemberships);
+    for (const id of idSet) nextRecordingMemberships.delete(id);
     set({
       recordings: get().recordings.filter((r) => !idSet.has(r.id)),
-      peaksMap: nextPeaksMap,
+      hasPeaks: nextHasPeaks,
+      peaksCache: nextPeaksCache,
+      memberships: nextMemberships,
+      recordingMemberships: nextRecordingMemberships,
       selectedRecordingId: idSet.has(selectedRecordingId!)
         ? null
         : selectedRecordingId,
@@ -211,18 +279,20 @@ export const createLibrarySlice: StateCreator<
         await addRecordingToCollection(recordingId, collectionId);
       }
     }
-    await get().loadAll();
+    set(withMembership(get(), recordingIds, collectionId, !isMember));
   },
 
   addRecordingsToCollection: async (recordingIds, collectionId) => {
     const { recordingMemberships } = get();
-    for (const recordingId of recordingIds) {
-      const alreadyMember =
-        recordingMemberships.get(recordingId)?.has(collectionId) ?? false;
-      if (!alreadyMember)
-        await addRecordingToCollection(recordingId, collectionId);
+    const toAdd = recordingIds.filter(
+      (id) => !(recordingMemberships.get(id)?.has(collectionId) ?? false),
+    );
+    for (const recordingId of toAdd) {
+      await addRecordingToCollection(recordingId, collectionId);
     }
-    await get().loadAll();
+    if (toAdd.length > 0) {
+      set(withMembership(get(), toAdd, collectionId, true));
+    }
   },
 
   importRecordings: async (filePaths) => {
@@ -264,8 +334,18 @@ export const createLibrarySlice: StateCreator<
       title: updates.title ?? null,
       comment: updates.comment ?? null,
     });
-    set({ status: null });
-    await get().loadAll();
+    set({
+      status: null,
+      recordings: get().recordings.map((r) =>
+        r.id === selectedRecordingId
+          ? {
+              ...r,
+              title: updates.title ?? null,
+              comment: updates.comment ?? null,
+            }
+          : r,
+      ),
+    });
   },
 
   normalizeRecording: async () => {
