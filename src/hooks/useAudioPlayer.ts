@@ -8,7 +8,9 @@ export function useAudioPlayer(recordings: Recording[]) {
   const selectedId = useStore((s) => s.selectedRecordingId);
   const setSelectedId = useStore((s) => s.setSelectedRecordingId);
 
-  const audio = useRef(new Audio()).current;
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  audioRef.current ??= new Audio();
+  const audio = audioRef.current;
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(() =>
     loadSetting("isLooping", false),
@@ -19,7 +21,6 @@ export function useAudioPlayer(recordings: Recording[]) {
   const [isAutoplay, setIsAutoplay] = useState(() =>
     loadSetting("isAutoplay", true),
   );
-  const [currentTime, setCurrentTime] = useState(0);
 
   const recordingsRef = useRef(recordings);
   const isAutoAdvanceRef = useRef(isAutoAdvance);
@@ -44,14 +45,9 @@ export function useAudioPlayer(recordings: Recording[]) {
       if (next) setSelectedIdRef.current(next.id);
       else setIsPlaying(false);
     }
-    function handleTimeUpdate() {
-      setCurrentTime(audio.currentTime);
-    }
     audio.addEventListener("ended", handleEnded);
-    audio.addEventListener("timeupdate", handleTimeUpdate);
     return () => {
       audio.removeEventListener("ended", handleEnded);
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.pause();
       audio.src = "";
     };
@@ -137,7 +133,6 @@ export function useAudioPlayer(recordings: Recording[]) {
     isLooping,
     isAutoAdvance,
     isAutoplay,
-    currentTime,
     togglePlay,
     stop,
     playNext,

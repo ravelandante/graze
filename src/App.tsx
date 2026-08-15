@@ -86,7 +86,6 @@ export default function App() {
     isLooping,
     isAutoAdvance,
     isAutoplay,
-    currentTime,
     togglePlay,
     stop,
     playNext,
@@ -164,7 +163,6 @@ export default function App() {
       )}
       <Playbar
         audioEl={audioEl}
-        currentTime={currentTime}
         isPlaying={isPlaying}
         isLooping={isLooping}
         isAutoAdvance={isAutoAdvance}

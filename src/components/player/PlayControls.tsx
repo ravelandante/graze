@@ -9,10 +9,11 @@ import {
 } from "lucide-react";
 import type { Recording } from "@types";
 import { formatTime } from "@lib/format";
+import { useAudioTime } from "@hooks/useAudioTime";
 
 interface Props {
   recording: Recording | null;
-  currentTime: number;
+  audioEl: HTMLAudioElement;
   isPlaying: boolean;
   isLooping: boolean;
   isAutoAdvance: boolean;
@@ -27,7 +28,7 @@ interface Props {
 
 export function PlayControls({
   recording,
-  currentTime,
+  audioEl,
   isPlaying,
   isLooping,
   isAutoAdvance,
@@ -39,6 +40,7 @@ export function PlayControls({
   onToggleAutoAdvance,
   onToggleAutoplay,
 }: Props) {
+  const currentTime = useAudioTime(audioEl);
   return (
     <div className="h-12 flex items-center px-4 gap-4 border-t border-zinc-800">
       {/* Track info + timer */}

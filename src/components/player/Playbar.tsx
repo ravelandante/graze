@@ -18,7 +18,6 @@ import { useStore } from "@store";
 
 interface Props {
   audioEl: HTMLAudioElement;
-  currentTime: number;
   isPlaying: boolean;
   isLooping: boolean;
   isAutoAdvance: boolean;
@@ -35,7 +34,6 @@ const COMPACT_HEIGHT = 32;
 
 export function Playbar({
   audioEl,
-  currentTime,
   isPlaying,
   isLooping,
   isAutoAdvance,
@@ -261,7 +259,7 @@ export function Playbar({
 
       <PlayControls
         recording={recording}
-        currentTime={currentTime}
+        audioEl={audioEl}
         isPlaying={isPlaying}
         isLooping={isLooping}
         isAutoAdvance={isAutoAdvance}
